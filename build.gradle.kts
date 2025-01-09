@@ -21,7 +21,7 @@ dependencyManagement {
 }
 
 val queryDSLVersion by extra("5.1.0")
-val jjwtVersion by extra("0.11.5")
+val jjwtVersion by extra("0.12.6")
 val bouncyCastleVersion by extra("1.79")
 
 repositories {
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-configuration-processor")
+    // JWT
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
