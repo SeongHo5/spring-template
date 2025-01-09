@@ -1,6 +1,8 @@
 package ho.seong.cho.oauth;
 
 import ho.seong.cho.exception.custom.NoSuchEntityException;
+import ho.seong.cho.oauth.entity.OAuth2UserInfo;
+import ho.seong.cho.oauth.entity.token.OAuth2ProviderToken;
 
 public interface OAuth2Template {
 

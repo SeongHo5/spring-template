@@ -22,6 +22,7 @@ dependencyManagement {
 
 val queryDSLVersion by extra("5.1.0")
 val jjwtVersion by extra("0.11.5")
+val bouncyCastleVersion by extra("1.79")
 
 repositories {
     mavenCentral()
@@ -41,6 +42,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+    implementation("org.bouncycastle:bcprov-jdk18on:$bouncyCastleVersion")
     // Lombok
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

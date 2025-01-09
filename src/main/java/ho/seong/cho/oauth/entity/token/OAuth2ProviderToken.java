@@ -1,5 +1,6 @@
-package ho.seong.cho.oauth;
+package ho.seong.cho.oauth.entity.token;
 
+import ho.seong.cho.oauth.entity.OAuth2ProviderType;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
