@@ -5,9 +5,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import java.math.BigInteger;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
@@ -21,36 +21,34 @@ public final class OpenIdConnectTokenUtils {
   private static final String HEADER_KEY_ID = "kid";
   private static final Pattern SPLITTER = Pattern.compile("\\.");
 
-  private OpenIdConnectTokenUtils() {
-    // Utility class
-  }
+  private OpenIdConnectTokenUtils() {}
 
   public static AppleUserInfo parse(String idToken, String modulus, String exponent) {
-    Claims body = parseTokenClaims(idToken, modulus, exponent).getBody();
+    Claims body = parseTokenClaims(idToken, modulus, exponent).getPayload();
     return AppleUserInfo.fromJwt(body);
   }
 
   public static String parseKeyIdHeader(
       String idToken, String expectedIssuer, String expectedAudience) {
-    return Jwts.parserBuilder()
+    return Jwts.parser()
         .requireIssuer(expectedIssuer)
         .requireAudience(expectedAudience)
         .build()
-        .parseClaimsJwt(extractJwtHeaderAndPayload(idToken))
+        .parseUnsecuredClaims(extractJwtHeaderAndPayload(idToken))
         .getHeader()
         .get(HEADER_KEY_ID)
         .toString();
   }
 
   private static Jws<Claims> parseTokenClaims(String token, String modulus, String exponent) {
-    return Jwts.parserBuilder()
-        .setSigningKey(generateRSAPublicKey(modulus, exponent))
+    return Jwts.parser()
+        .verifyWith(generateRSAPublicKey(modulus, exponent))
         .build()
-        .parseClaimsJws(token);
+        .parseSignedClaims(token);
   }
 
   /** Modulus와 Exponent를 이용하여 RSA 공개키를 생성합니다. */
-  private static Key generateRSAPublicKey(String base64Modulus, String base64Exponent) {
+  private static PublicKey generateRSAPublicKey(String base64Modulus, String base64Exponent) {
     try {
       KeyFactory keyFactory = KeyFactory.getInstance("RSA");
       byte[] decodedModulus = Base64.getUrlDecoder().decode(base64Modulus);

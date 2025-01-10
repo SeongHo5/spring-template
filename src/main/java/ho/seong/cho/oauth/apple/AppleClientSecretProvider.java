@@ -1,8 +1,7 @@
 package ho.seong.cho.oauth.apple;
 
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyFactory;
@@ -14,7 +13,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -24,17 +22,14 @@ import org.springframework.core.io.ClassPathResource;
 @Slf4j
 public final class AppleClientSecretProvider {
 
-  private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.ES256;
+  private static final SignatureAlgorithm SIGNATURE_ALGORITHM = Jwts.SIG.ES256;
+  private static final String AUDIENCE = "https://appleid.apple.com";
 
   static {
     Security.addProvider(new BouncyCastleProvider());
   }
 
-  public static final String AUDIENCE = "https://appleid.apple.com";
-
-  private AppleClientSecretProvider() {
-    // Utility class
-  }
+  private AppleClientSecretProvider() {}
 
   /**
    * Apple OAuth2 인증 요청에 사용할 Client Secret을 생성합니다.
@@ -52,21 +47,24 @@ public final class AppleClientSecretProvider {
    *       <li>읽어온 키를 PrivateKey 객체로 변환합니다.
    *     </ul>
    */
-  public static String create(String keyId, String teamId, String clientId, String keyPath) {
-    Map<String, Object> jwsHeader =
-        Map.of(JwsHeader.ALGORITHM, SIGNATURE_ALGORITHM.getValue(), JwsHeader.KEY_ID, keyId);
+  public static String create(
+      final String keyId, final String teamId, final String clientId, final String keyPath) {
     return Jwts.builder()
-        .setHeader(jwsHeader)
-        .setIssuer(teamId)
-        .setIssuedAt(new Date())
-        .setSubject(clientId)
-        .setAudience(AUDIENCE)
-        .setExpiration(createExpirationDate())
+        .header()
+        .keyId(keyId)
+        .and()
+        .issuer(teamId)
+        .issuedAt(new Date())
+        .subject(clientId)
+        .audience()
+        .add(AUDIENCE)
+        .and()
+        .expiration(createExpirationDate())
         .signWith(getAuthKey(keyPath), SIGNATURE_ALGORITHM)
         .compact();
   }
 
-  private static PrivateKey getAuthKey(String appleKeyPath) {
+  private static PrivateKey getAuthKey(final String appleKeyPath) {
     ClassPathResource resource = new ClassPathResource(appleKeyPath);
 
     try (PemReader pemReader = new PemReader(new InputStreamReader(resource.getInputStream()))) {
