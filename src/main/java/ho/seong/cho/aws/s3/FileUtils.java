@@ -20,7 +20,7 @@ public final class FileUtils {
         Optional.of(file)
             .map(MultipartFile::getOriginalFilename)
             .map(String::toLowerCase)
-            .orElseThrow(() -> new RuntimeException());
+            .orElseThrow(RuntimeException::new);
     final int lastIndexOfDot = originalFilename.lastIndexOf(".");
     if (lastIndexOfDot == -1 || lastIndexOfDot == originalFilename.length() - 1) {
       throw new RuntimeException();

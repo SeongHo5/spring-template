@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 /** S3 파일 처리 관련 서비스 인터페이스 */
-public interface LocatS3Client {
+public interface S3Client {
 
   /**
    * S3에 업로드된 객체 목록을 조회합니다.

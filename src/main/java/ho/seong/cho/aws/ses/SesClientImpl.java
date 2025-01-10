@@ -1,30 +1,30 @@
 package ho.seong.cho.aws.ses;
 
+import ho.seong.cho.aws.AbstractAwsClient;
+import ho.seong.cho.aws.AwsProperties;
 import java.nio.charset.StandardCharsets;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 import software.amazon.awssdk.services.ses.model.SesException;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class LocatSesClientImpl implements LocatSesClient {
+public class SesClientImpl extends AbstractAwsClient implements SesClient {
 
-  private final SesClient sesClient;
+  private final software.amazon.awssdk.services.ses.SesClient sesClient;
 
-  @Value("${service.aws.ses.from}")
-  private String from;
+  public SesClientImpl(AwsProperties awsProperties, software.amazon.awssdk.services.ses.SesClient sesClient) {
+    super(awsProperties);
+    this.sesClient = sesClient;
+  }
 
   @Override
   public void send(final String to, final String subject, final String content) {
     try {
       SendEmailRequest request =
           SendEmailRequest.builder()
-              .source(this.from)
+              .source(this.awsProperties.ses().from())
               .destination(d -> d.toAddresses(to))
               .message(
                   m ->

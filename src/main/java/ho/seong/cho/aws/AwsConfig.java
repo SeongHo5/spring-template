@@ -1,7 +1,6 @@
 package ho.seong.cho.aws;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -15,19 +14,12 @@ import software.amazon.awssdk.services.sns.SnsClient;
 @RequiredArgsConstructor
 public class AwsConfig {
 
-  @Value("${service.aws.region}")
-  private String region;
-
-  @Value("${service.aws.access-key}")
-  private String accessKey;
-
-  @Value("${service.aws.secret-key}")
-  private String secretKey;
+  private final AwsProperties awsProperties;
 
   @Bean
   public S3Client s3Client(AwsBasicCredentials basicCredentials) {
     return S3Client.builder()
-        .region(Region.of(this.region))
+        .region(Region.of(this.awsProperties.region()))
         .credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
         .build();
   }
@@ -35,7 +27,7 @@ public class AwsConfig {
   @Bean
   public SesClient sesClient(AwsBasicCredentials basicCredentials) {
     return SesClient.builder()
-        .region(Region.of(this.region))
+        .region(Region.of(this.awsProperties.region()))
         .credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
         .build();
   }
@@ -43,13 +35,14 @@ public class AwsConfig {
   @Bean
   public SnsClient snsClient(AwsBasicCredentials basicCredentials) {
     return SnsClient.builder()
-        .region(Region.of(this.region))
+        .region(Region.of(this.awsProperties.region()))
         .credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
         .build();
   }
 
   @Bean
   protected AwsBasicCredentials awsBasicCredentials() {
-    return AwsBasicCredentials.create(this.accessKey, this.secretKey);
+    return AwsBasicCredentials.create(
+        this.awsProperties.accessKey(), this.awsProperties.secretKey());
   }
 }
