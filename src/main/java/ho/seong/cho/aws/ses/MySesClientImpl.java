@@ -5,16 +5,17 @@ import ho.seong.cho.aws.AwsProperties;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 import software.amazon.awssdk.services.ses.model.SesException;
 
 @Component
 @Slf4j
-public class SesClientImpl extends AbstractAwsClient implements SesClient {
+public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
 
-  private final software.amazon.awssdk.services.ses.SesClient sesClient;
+  private final SesClient sesClient;
 
-  public SesClientImpl(AwsProperties awsProperties, software.amazon.awssdk.services.ses.SesClient sesClient) {
+  public MySesClientImpl(AwsProperties awsProperties, SesClient sesClient) {
     super(awsProperties);
     this.sesClient = sesClient;
   }

@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 @Service
-public class S3ClientImpl extends AbstractAwsClient implements S3Client {
+public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
   /** S3 경로 구분자 */
   protected static final String DIRECTORY_DELIMETER = "/";
 
@@ -23,9 +24,9 @@ public class S3ClientImpl extends AbstractAwsClient implements S3Client {
   /** 요청 당 최대 객체 수 */
   private static final int MAX_OBJECTS_PER_REQUEST = 50;
 
-  private final software.amazon.awssdk.services.s3.S3Client s3Client;
+  private final S3Client s3Client;
 
-  public S3ClientImpl(AwsProperties awsProperties, software.amazon.awssdk.services.s3.S3Client s3Client) {
+  public MyS3ClientImpl(AwsProperties awsProperties, S3Client s3Client) {
     super(awsProperties);
     this.s3Client = s3Client;
   }

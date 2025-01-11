@@ -1,6 +1,6 @@
 package ho.seong.cho.aws.ses;
 
-public interface SesClient {
+public interface MySesClient {
 
   /**
    * 메일을 전송한다.
