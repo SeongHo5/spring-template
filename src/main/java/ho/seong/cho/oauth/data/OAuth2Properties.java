@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @param apple Apple OAuth2 관련 설정
  */
 @ConfigurationProperties(prefix = "security.oauth2.client")
-public record OAuth2Properties(Kakao kakao, Apple apple) {
+public record OAuth2Properties(Kakao kakao, Naver naver, Apple apple) {
 
   /**
    * Kakao OAuth2 Properties
@@ -26,6 +26,22 @@ public record OAuth2Properties(Kakao kakao, Apple apple) {
     public static final String GRANT_TYPE = "authorization_code";
 
     public static final String TARGET_ID_TYPE = "user_id";
+  }
+
+  /**
+   * Naver OAuth2 Properties
+   *
+   * @param clientId Naver Client ID
+   * @param clientSecret Naver Client Secret
+   * @param redirectUri Naver Redirect URI
+   */
+  public record Naver(String clientId, String clientSecret, String redirectUri) {
+
+    public static final String GRANT_TYPE_ISSUE = "authorization_code";
+
+    public static final String GRANT_TYPE_RENEW = "refresh_token";
+
+    public static final String GRANT_TYPE_WITHDRAWAL = "delete";
   }
 
   /**
