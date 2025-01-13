@@ -1,4 +1,4 @@
-package ho.seong.cho.oauth.entity;
+package ho.seong.cho.oauth.data.enums;
 
 public enum OAuth2ProviderType {
   APPLE,

@@ -1,7 +1,7 @@
 package ho.seong.cho.aws.ses;
 
 import ho.seong.cho.aws.AbstractAwsClient;
-import ho.seong.cho.aws.AwsProperties;
+import ho.seong.cho.aws.config.AwsProperties;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

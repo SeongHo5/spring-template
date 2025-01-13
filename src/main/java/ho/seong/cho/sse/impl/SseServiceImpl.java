@@ -1,5 +1,7 @@
-package ho.seong.cho.sse;
+package ho.seong.cho.sse.impl;
 
+import ho.seong.cho.sse.SseService;
+import ho.seong.cho.sse.SseType;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;

@@ -1,13 +1,13 @@
 package ho.seong.cho.oauth;
 
 import ho.seong.cho.exception.custom.NoSuchEntityException;
-import ho.seong.cho.oauth.entity.OAuth2UserInfo;
-import ho.seong.cho.oauth.entity.token.OAuth2ProviderToken;
+import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
+import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 
 public interface OAuth2Template {
 
   /**
-   * 인가 코드로 토큰을 발급합니다.
+   * 인가 코드로 토큰을 발급한다.
    *
    * @param code 인가 코드
    * @return 발급된 {@link OAuth2ProviderToken}
@@ -15,11 +15,11 @@ public interface OAuth2Template {
   OAuth2ProviderToken issueToken(final String code);
 
   /**
-   * 사용자가 인증되었는지 확인합니다.
+   * 사용자가 인증되었는지 확인한다.
    *
    * @param oAuthId 확인할 사용자의 OAuth ID
    * @return 사용자가 인증되었는지 여부
-   * @apiNote Redis Cache에 저장된 유효한 OAuth 제공자 토큰이 있는지 여부로 확인합니다.
+   * @apiNote Redis Cache에 저장된 유효한 OAuth 제공자 토큰이 있는지 여부로 확인한다.
    */
   Boolean isAuthenticated(final String oAuthId);
 
@@ -34,7 +34,7 @@ public interface OAuth2Template {
   OAuth2UserInfo fetchUserInfo(final String oAuthId);
 
   /**
-   * 회원 탈퇴(OAuth2 연결 끊기, 토큰 삭제) 작업을 수행합니다.
+   * 회원 탈퇴(OAuth2 연결 끊기, 토큰 삭제) 작업을 수행한다.
    *
    * @param userOAuthId 사용자의 OAuth ID
    */

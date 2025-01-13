@@ -1,7 +1,7 @@
 package ho.seong.cho.aws.s3;
 
 import ho.seong.cho.aws.AbstractAwsClient;
-import ho.seong.cho.aws.AwsProperties;
+import ho.seong.cho.aws.config.AwsProperties;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;

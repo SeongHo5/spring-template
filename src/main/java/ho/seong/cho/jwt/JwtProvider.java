@@ -5,12 +5,8 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
-import org.springframework.http.HttpHeaders;
 
 public interface JwtProvider {
-
-  /** JWT 인증을 위한 {@link HttpHeaders#AUTHORIZATION} 헤더의 접두사 */
-  String BEARER_PREFIX = "Bearer ";
 
   /**
    * {@link User} 정보를 기반으로 토큰을 생성한다.

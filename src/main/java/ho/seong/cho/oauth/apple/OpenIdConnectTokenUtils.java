@@ -1,6 +1,6 @@
 package ho.seong.cho.oauth.apple;
 
-import ho.seong.cho.oauth.entity.AppleUserInfo;
+import ho.seong.cho.oauth.data.entity.AppleUserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -47,7 +47,7 @@ public final class OpenIdConnectTokenUtils {
         .parseSignedClaims(token);
   }
 
-  /** Modulus와 Exponent를 이용하여 RSA 공개키를 생성합니다. */
+  /** Modulus와 Exponent를 이용하여 RSA 공개키를 생성한다. */
   private static PublicKey generateRSAPublicKey(String base64Modulus, String base64Exponent) {
     try {
       KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -64,7 +64,7 @@ public final class OpenIdConnectTokenUtils {
     }
   }
 
-  /** JWT 토큰의 Header와 Payload를 추출합니다. */
+  /** JWT 토큰의 Header와 Payload를 추출한다. */
   private static String extractJwtHeaderAndPayload(String idToken) {
     String[] parts = SPLITTER.split(idToken);
     if (parts.length != JWT_PARTS_COUNT) {

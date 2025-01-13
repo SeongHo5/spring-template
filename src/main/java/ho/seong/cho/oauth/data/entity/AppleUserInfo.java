@@ -1,7 +1,9 @@
-package ho.seong.cho.oauth.entity;
+package ho.seong.cho.oauth.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import io.jsonwebtoken.Claims;
+import java.util.Set;
 import lombok.Builder;
 
 /**
@@ -19,7 +21,7 @@ import lombok.Builder;
 public record AppleUserInfo(
     @JsonProperty("iss") String issuer,
     @JsonProperty("sub") String subject,
-    @JsonProperty("aud") String audience,
+    @JsonProperty("aud") Set<String> audience,
     @JsonProperty("iat") Long issuedAt,
     @JsonProperty("exp") Long expirationTime,
     String email,

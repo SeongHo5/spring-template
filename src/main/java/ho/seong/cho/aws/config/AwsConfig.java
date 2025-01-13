@@ -1,4 +1,4 @@
-package ho.seong.cho.aws;
+package ho.seong.cho.aws.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

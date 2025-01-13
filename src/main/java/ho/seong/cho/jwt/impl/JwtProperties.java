@@ -1,4 +1,4 @@
-package ho.seong.cho.jwt;
+package ho.seong.cho.jwt.impl;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +9,7 @@ import java.util.Base64;
 import javax.crypto.SecretKey;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
+import org.springframework.http.HttpHeaders;
 
 /**
  * JWT 관련 설정 정보 Properties
@@ -19,6 +20,9 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
  */
 @ConfigurationProperties(prefix = "jwt")
 public record JwtProperties(String issuer, String secret, SecretKey key) {
+
+  /** JWT 인증을 위한 {@link HttpHeaders#AUTHORIZATION} 헤더의 접두사 */
+  public static final String BEARER_PREFIX = "Bearer ";
 
   /** JWT에서 사용자 권한 정보를 저장하는 클레임 키 */
   static final String AUTHENTICATION_KEY = "auth";
