@@ -8,9 +8,9 @@ import jakarta.annotation.Nullable;
  * Kakao OAuth2 Response
  *
  * @param tokenType 토큰 타입, {@code Bearer}로 고정
- * @param accessToken 액세스 토큰
+ * @param accessToken 접근 토큰
  * @param idToken ID 토큰
- * @param expiresIn 액세스 토큰 만료 시간(초)
+ * @param expiresIn 접근 토큰 만료 시간(초)
  * @param refreshToken 리프레시 토큰
  * @param refreshTokenExpiresIn 리프레시 토큰 만료 시간(초)
  * @param scope 인증된 사용자의 조회 권한 범위

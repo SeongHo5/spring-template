@@ -4,5 +4,7 @@ public enum OAuth2ProviderType {
   APPLE,
   GOOGLE,
   KAKAO,
-  NAVER
+  NAVER,
+  GITHUB,
+  FACEBOOK
 }

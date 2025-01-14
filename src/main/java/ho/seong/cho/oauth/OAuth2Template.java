@@ -19,24 +19,24 @@ public interface OAuth2Template {
    *
    * @param oAuthId 확인할 사용자의 OAuth ID
    * @return 사용자가 인증되었는지 여부
-   * @apiNote Redis Cache에 저장된 유효한 OAuth 제공자 토큰이 있는지 여부로 확인한다.
+   * @apiNote Cache에 저장된 유효한 OAuth 제공자 토큰이 있는지 여부로 확인한다.
    */
-  Boolean isAuthenticated(final String oAuthId);
+  boolean isAuthenticated(final String oAuthId);
 
   /**
-   * 사용자의 OAuth ID으로 사용자 정보를 가져옵니다.
+   * 사용자의 OAuth ID으로 사용자 정보를 가져온다.
    *
    * @param oAuthId 사용자의 OAuth ID
    * @return 사용자 정보
-   * @apiNote Redis Cache에 저장된 토큰을 사용하여 사용자 정보를 가져옵니다.
+   * @apiNote Cache에 저장된 토큰을 사용하여 사용자 정보를 가져온다.
    * @throws NoSuchEntityException OAuth ID에 해당하는 토큰이 없을 경우
    */
-  OAuth2UserInfo fetchUserInfo(final String oAuthId);
+  OAuth2UserInfo getUserInfo(final String oAuthId);
 
   /**
    * 회원 탈퇴(OAuth2 연결 끊기, 토큰 삭제) 작업을 수행한다.
    *
-   * @param oAuthId 사용자의 OAuth ID
+   * @param oAuthId 탈퇴 처리할 사용자의 OAuth ID
    */
   void withdrawal(final String oAuthId);
 }

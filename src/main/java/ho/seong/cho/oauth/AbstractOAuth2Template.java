@@ -18,19 +18,19 @@ public abstract class AbstractOAuth2Template implements OAuth2Template {
   protected final OAuth2ProviderTokenRepository providerTokenRepository;
 
   @Override
-  public Boolean isAuthenticated(final String oAuthId) {
+  public boolean isAuthenticated(final String oAuthId) {
     return this.providerTokenRepository.existsById(oAuthId);
   }
 
   /**
    * 사용자의 OAuth2 인증 토큰 정보를 조회한다.
    *
-   * @param userOAuthId 조회에 사용할 사용자의 OAuth2 ID
+   * @param oAuthId 조회에 사용할 사용자의 OAuth2 ID
    * @return 사용자의 OAuth2 인증 토큰 정보
    * @throws RuntimeException 사용자의 OAuth2 인증 토큰 정보가 존재하지 않을 경우
    */
-  protected OAuth2ProviderToken findToken(final String userOAuthId) {
-    return this.providerTokenRepository.findById(userOAuthId).orElseThrow(RuntimeException::new);
+  protected OAuth2ProviderToken findToken(final String oAuthId) {
+    return this.providerTokenRepository.findById(oAuthId).orElseThrow(RuntimeException::new);
   }
 
   /**

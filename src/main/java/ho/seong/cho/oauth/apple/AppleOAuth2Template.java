@@ -49,7 +49,7 @@ public class AppleOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2UserInfo fetchUserInfo(String oAuthId) {
+  public OAuth2UserInfo getUserInfo(String oAuthId) {
     final String idToken = super.findToken(oAuthId).getIdToken();
     OAuth2ProviderJsonWebKey jsonWebKey = this.getMatchingJsonWebKey(idToken);
     return OpenIdConnectTokenUtils.parse(idToken, jsonWebKey.n(), jsonWebKey.e());
@@ -60,8 +60,16 @@ public class AppleOAuth2Template extends AbstractOAuth2Template {
   public void withdrawal(String oAuthId) {
     final String clientSecret = AppleClientSecretProvider.create(super.oAuth2Properties.apple());
     OAuth2ProviderToken providerToken = super.findToken(oAuthId);
-    this.revokeAccessToken(clientSecret, providerToken.getAccessToken());
-    this.revokeRefreshToken(clientSecret, providerToken.getRefreshToken());
+    this.appleOAuth2Client.revokeToken(
+        super.oAuth2Properties.apple().clientId(),
+        clientSecret,
+        providerToken.getAccessToken(),
+        OAuth2Properties.Apple.ACCESS_TOKEN_HINT);
+    this.appleOAuth2Client.revokeToken(
+        super.oAuth2Properties.apple().clientId(),
+        clientSecret,
+        providerToken.getRefreshToken(),
+        OAuth2Properties.Apple.REFRESH_TOKEN_HINT);
     this.providerTokenRepository.delete(providerToken);
   }
 
@@ -75,21 +83,5 @@ public class AppleOAuth2Template extends AbstractOAuth2Template {
         .filter(jwk -> jwk.kid().equals(keyId))
         .findFirst()
         .orElseThrow(() -> new RuntimeException("Cannot Process JWT: No matching algorithm"));
-  }
-
-  private void revokeAccessToken(String clientSecret, String accessToken) {
-    this.appleOAuth2Client.revokeToken(
-        super.oAuth2Properties.apple().clientId(),
-        clientSecret,
-        accessToken,
-        OAuth2Properties.Apple.ACCESS_TOKEN_HINT);
-  }
-
-  private void revokeRefreshToken(String clientSecret, String refreshToken) {
-    this.appleOAuth2Client.revokeToken(
-        super.oAuth2Properties.apple().clientId(),
-        clientSecret,
-        refreshToken,
-        OAuth2Properties.Apple.REFRESH_TOKEN_HINT);
   }
 }
