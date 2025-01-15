@@ -1,4 +1,4 @@
-package ho.seong.cho.oauth.apple;
+package ho.seong.cho.oauth.utils;
 
 import ho.seong.cho.oauth.data.entity.AppleUserInfo;
 import io.jsonwebtoken.Claims;

@@ -41,7 +41,7 @@ public sealed interface OAuth2ProviderTokenDto
   /**
    * OAuth2 제공자가 발급한 갱신 토큰의 만료 시간을 반환한다.
    *
-   * @return 갱신 토큰 만료 시간(초)
+   * @return 갱신 토큰 만료 시간(초) / 제공자가 명시적으로 만료 시간을 지정하지 않는 경우 {@link Integer#MAX_VALUE}
    */
   Integer getRefreshTokenExpiresIn();
 }

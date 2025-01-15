@@ -3,7 +3,6 @@ package ho.seong.cho.oauth;
 import static ho.seong.cho.jwt.impl.JwtProperties.BEARER_PREFIX;
 
 import ho.seong.cho.infra.redis.OAuth2ProviderTokenRepository;
-import ho.seong.cho.oauth.data.OAuth2Properties;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

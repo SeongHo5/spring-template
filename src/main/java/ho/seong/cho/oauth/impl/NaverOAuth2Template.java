@@ -1,10 +1,10 @@
-package ho.seong.cho.oauth.naver;
+package ho.seong.cho.oauth.impl;
 
 import ho.seong.cho.infra.client.http.NaverOAuth2Client;
 import ho.seong.cho.infra.client.http.NaverUserClient;
 import ho.seong.cho.infra.redis.OAuth2ProviderTokenRepository;
 import ho.seong.cho.oauth.AbstractOAuth2Template;
-import ho.seong.cho.oauth.data.OAuth2Properties;
+import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
@@ -28,7 +28,7 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(String code) {
+  public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.Naver naverProperties = this.oAuth2Properties.naver();
     OAuth2ProviderTokenDto tokenDto =
         this.naverOAuth2Client.issueToken(
@@ -39,19 +39,19 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
             code,
             null);
     final String oAuthId =
-        this.naverUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).id();
+        this.naverUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).getId();
     return super.providerTokenRepository.save(
         OAuth2ProviderToken.from(OAuth2ProviderType.NAVER, oAuthId, tokenDto));
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(String oAuthId) {
+  public OAuth2UserInfo getUserInfo(final String oAuthId) {
     final String accessToken = super.findToken(oAuthId).getAccessToken();
     return this.naverUserClient.getUserInfo(prependBearer(accessToken));
   }
 
   @Override
-  public void withdrawal(String oAuthId) {
+  public void withdrawal(final String oAuthId) {
     final String accessToken = super.findToken(oAuthId).getAccessToken();
     this.naverOAuth2Client.withdrawal(
         OAuth2Properties.Naver.GRANT_TYPE_WITHDRAWAL,

@@ -1,4 +1,4 @@
-package ho.seong.cho.oauth.data;
+package ho.seong.cho.oauth;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -6,7 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * OAuth2 Client Properties 관리 클래스
  *
  * @param kakao Kakao OAuth2 관련 설정
+ * @param naver Naver OAuth2 관련 설정
  * @param apple Apple OAuth2 관련 설정
+ * @param google Google OAuth2 관련 설정
+ * @param github GitHub OAuth2 관련 설정
  */
 @ConfigurationProperties(prefix = "security.oauth2.client")
 public record OAuth2Properties(

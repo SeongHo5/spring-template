@@ -1,10 +1,10 @@
-package ho.seong.cho.oauth.github;
+package ho.seong.cho.oauth.impl;
 
 import ho.seong.cho.infra.client.http.GitHubOAuth2Client;
 import ho.seong.cho.infra.client.http.GitHubUserClient;
 import ho.seong.cho.infra.redis.OAuth2ProviderTokenRepository;
 import ho.seong.cho.oauth.AbstractOAuth2Template;
-import ho.seong.cho.oauth.data.OAuth2Properties;
+import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.internal.OAuth2WithdrawalRequest;
@@ -29,7 +29,7 @@ public class GitHubOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(String code) {
+  public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.GitHub gitHubProperties = this.oAuth2Properties.github();
     OAuth2ProviderTokenDto tokenDto =
         this.gitHubOAuth2Client.issueToken(
@@ -43,13 +43,13 @@ public class GitHubOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(String oAuthId) {
+  public OAuth2UserInfo getUserInfo(final String oAuthId) {
     final String accessToken = super.findToken(oAuthId).getAccessToken();
     return this.gitHubUserClient.getUserInfo(accessToken);
   }
 
   @Override
-  public void withdrawal(String oAuthId) {
+  public void withdrawal(final String oAuthId) {
     final String accessToken = super.findToken(oAuthId).getAccessToken();
     this.gitHubUserClient.withdrawal(
         this.oAuth2Properties.github().clientId(), OAuth2WithdrawalRequest.from(accessToken));

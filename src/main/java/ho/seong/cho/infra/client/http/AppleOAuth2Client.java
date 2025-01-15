@@ -1,6 +1,6 @@
 package ho.seong.cho.infra.client.http;
 
-import ho.seong.cho.oauth.data.OAuth2Properties;
+import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.internal.OAuth2ProviderJsonWebKeys;
 import ho.seong.cho.oauth.data.token.AppleOAuth2TokenDto;
 import org.springframework.cache.annotation.Cacheable;

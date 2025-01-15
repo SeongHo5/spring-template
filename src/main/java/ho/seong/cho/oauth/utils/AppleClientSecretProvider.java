@@ -1,6 +1,6 @@
-package ho.seong.cho.oauth.apple;
+package ho.seong.cho.oauth.utils;
 
-import ho.seong.cho.oauth.data.OAuth2Properties;
+import ho.seong.cho.oauth.OAuth2Properties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import java.io.IOException;

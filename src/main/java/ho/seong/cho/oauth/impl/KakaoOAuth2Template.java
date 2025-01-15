@@ -1,10 +1,10 @@
-package ho.seong.cho.oauth.kakao;
+package ho.seong.cho.oauth.impl;
 
 import ho.seong.cho.infra.client.http.KakaoOAuth2Client;
 import ho.seong.cho.infra.client.http.KakaoUserClient;
 import ho.seong.cho.infra.redis.OAuth2ProviderTokenRepository;
 import ho.seong.cho.oauth.AbstractOAuth2Template;
-import ho.seong.cho.oauth.data.OAuth2Properties;
+import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
@@ -29,7 +29,7 @@ public class KakaoOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(String code) {
+  public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.Kakao kakaoProperties = this.oAuth2Properties.kakao();
     OAuth2ProviderTokenDto tokenDto =
         this.kakaoOAuth2Client.issueOrRenewToken(
@@ -39,20 +39,20 @@ public class KakaoOAuth2Template extends AbstractOAuth2Template {
             kakaoProperties.redirectUri(),
             code);
     final String oAuthId =
-        this.kakaoUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).id();
+        this.kakaoUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).getId();
     return super.providerTokenRepository.save(
         OAuth2ProviderToken.from(OAuth2ProviderType.KAKAO, oAuthId, tokenDto));
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(String oAuthId) {
+  public OAuth2UserInfo getUserInfo(final String oAuthId) {
     final String accessToken = super.findToken(oAuthId).getAccessToken();
     return this.kakaoUserClient.getUserInfo(prependBearer(accessToken));
   }
 
   @Override
   @Transactional
-  public void withdrawal(String oAuthId) {
+  public void withdrawal(final String oAuthId) {
     final String accessToken = super.findToken(oAuthId).getAccessToken();
     this.kakaoUserClient.withdrawal(prependBearer(accessToken));
     this.providerTokenRepository.deleteById(oAuthId);

@@ -12,6 +12,12 @@ public interface GitHubUserClient {
   @GetMapping("/user")
   GitHubUserInfo getUserInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken);
 
+  /**
+   * 사용자 연결 해제
+   *
+   * @param clientId 클라이언트 ID
+   * @param request 연결 해제 요청
+   */
   @DeleteMapping("/applications/{client_id}/grant")
   void withdrawal(
       @PathVariable("client_id") String clientId, @RequestBody OAuth2WithdrawalRequest request);
