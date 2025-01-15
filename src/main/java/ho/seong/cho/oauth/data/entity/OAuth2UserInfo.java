@@ -1,8 +1,10 @@
 package ho.seong.cho.oauth.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 
 /** OAuth2 제공자로부터 받은 사용자 정보를 표준화하는 인터페이스 */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface OAuth2UserInfo
     permits AppleUserInfo, GoogleUserInfo, KakaoUserInfo, NaverUserInfo, GitHubUserInfo {
 
