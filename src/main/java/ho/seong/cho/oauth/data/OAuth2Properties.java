@@ -9,7 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @param apple Apple OAuth2 관련 설정
  */
 @ConfigurationProperties(prefix = "security.oauth2.client")
-public record OAuth2Properties(Kakao kakao, Naver naver, Apple apple) {
+public record OAuth2Properties(
+    Kakao kakao, Naver naver, Apple apple, Google google, GitHub github) {
 
   /**
    * Kakao OAuth2 Properties
@@ -64,4 +65,25 @@ public record OAuth2Properties(Kakao kakao, Naver naver, Apple apple) {
 
     public static final String REFRESH_TOKEN_HINT = "refresh_token";
   }
+
+  /**
+   * Google OAuth2 Properties
+   *
+   * @param clientId Google Client ID
+   * @param clientSecret Google Client Secret
+   * @param redirectUri Google Redirect URI
+   */
+  public record Google(String clientId, String clientSecret, String redirectUri) {
+
+    public static final String GRANT_TYPE = "authorization_code";
+  }
+
+  /**
+   * GitHub OAuth2 Properties
+   *
+   * @param clientId GitHub Client ID
+   * @param clientSecret GitHub Client Secret
+   * @param redirectUri GitHub Redirect URI
+   */
+  public record GitHub(String clientId, String clientSecret, String redirectUri) {}
 }

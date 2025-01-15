@@ -4,7 +4,7 @@ import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 
 /** OAuth2 제공자로부터 받은 사용자 정보를 표준화하는 인터페이스 */
 public sealed interface OAuth2UserInfo
-    permits AppleUserInfo, KakaoUserInfo, NaverUserInfo { // 템플릿 사용할 때 permits 구문 작성 필요
+    permits AppleUserInfo, GoogleUserInfo, KakaoUserInfo, NaverUserInfo, GitHubUserInfo {
 
   /**
    * 각 제공자가 발급 & 관리하는 사용자 고유 ID을 반환합니다.

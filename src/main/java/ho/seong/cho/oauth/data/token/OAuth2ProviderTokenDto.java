@@ -4,7 +4,11 @@ import jakarta.annotation.Nullable;
 
 /** OAuth2 Provider별 응답을 담는 인터페이스 */
 public sealed interface OAuth2ProviderTokenDto
-    permits AppleOAuth2TokenDto, KakaoOAuth2TokenDto, NaverOAuth2TokenDto {
+    permits AppleOAuth2TokenDto,
+        GoogleOAuth2TokenDto,
+        KakaoOAuth2TokenDto,
+        NaverOAuth2TokenDto,
+        GitHubOAuth2TokenDto {
 
   /**
    * OAuth2 제공자가 발급한 접근 토큰(access token)을 반환한다.
