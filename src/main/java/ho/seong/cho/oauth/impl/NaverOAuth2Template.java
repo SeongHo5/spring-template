@@ -28,6 +28,11 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
+  public OAuth2ProviderType getProviderType() {
+    return OAuth2ProviderType.NAVER;
+  }
+
+  @Override
   public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.Naver naverProperties = this.oAuth2Properties.naver();
     OAuth2ProviderTokenDto tokenDto =

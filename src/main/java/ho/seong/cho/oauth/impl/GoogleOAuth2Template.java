@@ -28,6 +28,11 @@ public class GoogleOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
+  public OAuth2ProviderType getProviderType() {
+    return OAuth2ProviderType.GOOGLE;
+  }
+
+  @Override
   public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.Google googleProperties = this.oAuth2Properties.google();
     GoogleOAuth2TokenDto tokenDto =

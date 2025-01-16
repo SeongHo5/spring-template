@@ -2,10 +2,18 @@ package ho.seong.cho.oauth;
 
 import ho.seong.cho.exception.custom.NoSuchEntityException;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
+import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import jakarta.validation.constraints.NotNull;
 
 public interface OAuth2Template {
+
+  /**
+   * OAuth2 제공자 유형을 반환한다.
+   *
+   * @return OAuth2 제공자 유형
+   */
+  OAuth2ProviderType getProviderType();
 
   /**
    * 인가 코드로 토큰을 발급한다.

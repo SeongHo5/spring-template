@@ -1,4 +1,4 @@
-package ho.seong.cho.oauth.utils;
+package ho.seong.cho.oauth.support;
 
 import ho.seong.cho.oauth.OAuth2Properties;
 import io.jsonwebtoken.Jwts;

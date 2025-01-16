@@ -29,6 +29,11 @@ public class KakaoOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
+  public OAuth2ProviderType getProviderType() {
+    return OAuth2ProviderType.KAKAO;
+  }
+
+  @Override
   public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.Kakao kakaoProperties = this.oAuth2Properties.kakao();
     OAuth2ProviderTokenDto tokenDto =

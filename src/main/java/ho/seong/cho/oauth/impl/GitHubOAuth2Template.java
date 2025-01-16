@@ -29,6 +29,11 @@ public class GitHubOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
+  public OAuth2ProviderType getProviderType() {
+    return OAuth2ProviderType.GITHUB;
+  }
+
+  @Override
   public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.GitHub gitHubProperties = this.oAuth2Properties.github();
     OAuth2ProviderTokenDto tokenDto =

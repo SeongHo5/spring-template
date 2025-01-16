@@ -10,8 +10,8 @@ import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.internal.OAuth2ProviderJsonWebKeys;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderTokenDto;
-import ho.seong.cho.oauth.utils.AppleClientSecretProvider;
-import ho.seong.cho.oauth.utils.OpenIdConnectTokenUtils;
+import ho.seong.cho.oauth.support.AppleClientSecretProvider;
+import ho.seong.cho.oauth.support.OpenIdConnectTokenUtils;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +27,11 @@ public class AppleOAuth2Template extends AbstractOAuth2Template {
       OAuth2ProviderTokenRepository providerTokenRepository) {
     super(oAuth2Properties, providerTokenRepository);
     this.appleOAuth2Client = appleOAuth2Client;
+  }
+
+  @Override
+  public OAuth2ProviderType getProviderType() {
+    return OAuth2ProviderType.APPLE;
   }
 
   @Override
