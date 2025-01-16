@@ -29,9 +29,9 @@ public class OAuth2ProviderToken {
   @TimeToLive private Long timeToLive;
 
   public static OAuth2ProviderToken from(
-      OAuth2ProviderType providerType, String id, OAuth2ProviderTokenDto providerTokenDto) {
+      OAuth2ProviderType providerType, String oAuthId, OAuth2ProviderTokenDto providerTokenDto) {
     return builder()
-        .id(id)
+        .id(oAuthId)
         .providerType(providerType)
         .accessToken(providerTokenDto.getAccessToken())
         .refreshToken(providerTokenDto.getRefreshToken())
