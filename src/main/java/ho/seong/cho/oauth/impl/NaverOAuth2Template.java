@@ -9,6 +9,7 @@ import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderTokenDto;
+import ho.seong.cho.oauth.support.NaverOAuth2StateHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,6 +36,7 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
   @Override
   public OAuth2ProviderToken issueToken(final String code) {
     OAuth2Properties.Naver naverProperties = this.oAuth2Properties.naver();
+    final String state = NaverOAuth2StateHolder.consume();
     OAuth2ProviderTokenDto tokenDto =
         this.naverOAuth2Client.issueToken(
             OAuth2Properties.Naver.GRANT_TYPE_ISSUE,
@@ -42,7 +44,7 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
             naverProperties.clientSecret(),
             naverProperties.redirectUri(),
             code,
-            null);
+            state);
     final String oAuthId =
         this.naverUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).getId();
     return super.providerTokenRepository.save(
