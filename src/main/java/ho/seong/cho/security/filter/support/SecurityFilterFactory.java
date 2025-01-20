@@ -1,4 +1,4 @@
-package ho.seong.cho.security.filter;
+package ho.seong.cho.security.filter.support;
 
 import ho.seong.cho.entity.CustomAuditorAware;
 import ho.seong.cho.jwt.JwtProvider;
@@ -6,6 +6,7 @@ import ho.seong.cho.security.MyUserDetailsService;
 import ho.seong.cho.security.filter.impl.AdminApiAuthorizationFilter;
 import ho.seong.cho.security.filter.impl.JwtAuthenticationFilter;
 import ho.seong.cho.security.filter.impl.PublicApiAccessControlFilter;
+import ho.seong.cho.security.filter.impl.RateLimitFilter;
 import ho.seong.cho.web.resolver.HandlerMethodAnnotationResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,5 +33,9 @@ public class SecurityFilterFactory {
   public AdminApiAuthorizationFilter adminAuth() {
     return new AdminApiAuthorizationFilter(
         this.annotationResolver, this.auditorAware, this.eventPublisher);
+  }
+
+  public RateLimitFilter rateLimit() {
+    return new RateLimitFilter(this.annotationResolver, new SimpleRateLimiter());
   }
 }
