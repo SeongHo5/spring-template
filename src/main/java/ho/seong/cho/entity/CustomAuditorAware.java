@@ -32,6 +32,10 @@ public class CustomAuditorAware implements AuditorAware<String> {
         .map(UserDetails::getUsername);
   }
 
+  public String getCurrentAuditorOrAnonymous() {
+    return this.getCurrentAuditor().orElse(PRINCIPAL_ANONYMOUS_USER);
+  }
+
   private boolean isNotAnonymous(Authentication authentication) {
     return !PRINCIPAL_ANONYMOUS_USER.equalsIgnoreCase(authentication.getName());
   }

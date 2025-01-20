@@ -9,5 +9,7 @@ public interface MyUserDetails extends UserDetails {
 
   Long getId();
 
+  boolean isSuperAdmin();
+
   boolean isAdmin();
 }
