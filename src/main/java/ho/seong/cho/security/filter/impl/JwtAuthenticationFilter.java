@@ -1,10 +1,8 @@
 package ho.seong.cho.security.filter.impl;
 
-import ho.seong.cho.jwt.JwtProvider;
+import ho.seong.cho.jwt.impl.JwtUtils;
+import ho.seong.cho.security.authentication.JwtAuthenticationToken;
 import ho.seong.cho.security.filter.AbstractMySecurityFilter;
-import ho.seong.cho.security.userdetails.MyUserDetailsService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,8 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends AbstractMySecurityFilter {
 
-  private final JwtProvider jwtProvider;
-  private final MyUserDetailsService userDetailsService;
+  private final AuthenticationProvider authenticationProvider;
 
   @Override
   protected void doFilterInternal(
@@ -31,15 +29,15 @@ public class JwtAuthenticationFilter extends AbstractMySecurityFilter {
       return;
     }
 
-    Optional<String> userToken = Optional.of(request).map(this.jwtProvider::resolve);
+    Optional<String> userToken = Optional.of(request).map(JwtUtils::resolve);
 
-    if (userToken.isPresent()) {
-      this.processAuthentication(userToken.get(), response);
-      filterChain.doFilter(request, response);
+    if (userToken.isEmpty()) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No Authorization Header");
       return;
     }
 
-    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No Authorization Header");
+    this.setAuthentication(userToken.get());
+    this.proceed(request, response, filterChain);
   }
 
   @Override
@@ -47,20 +45,12 @@ public class JwtAuthenticationFilter extends AbstractMySecurityFilter {
     return this.isPublicApiAuthorized(request);
   }
 
-  private void processAuthentication(String token, HttpServletResponse response)
-      throws IOException {
-    try {
-      Claims claims = this.jwtProvider.parse(token).orElseThrow();
-      this.setAuthentication(claims);
-    } catch (JwtException ex) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-    }
-  }
+  private void setAuthentication(String token) {
+    Authentication authentication =
+        this.authenticationProvider.authenticate(new JwtAuthenticationToken(token));
 
-  private void setAuthentication(Claims claims) {
-    SecurityContext context = SecurityContextHolder.createEmptyContext();
-    Authentication authentication = this.userDetailsService.createAuthentication(claims);
-    context.setAuthentication(authentication);
-    SecurityContextHolder.setContext(context);
+    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
   }
 }

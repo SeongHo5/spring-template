@@ -25,7 +25,7 @@ public record JwtProperties(String issuer, String secret, SecretKey key) {
   public static final String BEARER_PREFIX = "Bearer ";
 
   /** JWT에서 사용자 권한 정보를 저장하는 클레임 키 */
-  static final String AUTHENTICATION_KEY = "auth";
+  public static final String AUTHENTICATION_KEY = "auth";
 
   /** JWT에서 사용자 이름을 저장하는 클레임 키 */
   static final String USER_NAME_KEY = "name";

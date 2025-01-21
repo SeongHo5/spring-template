@@ -4,14 +4,11 @@ import static ho.seong.cho.jwt.impl.JwtProperties.*;
 
 import ho.seong.cho.jwt.JsonWebToken;
 import ho.seong.cho.jwt.JwtProvider;
-import ho.seong.cho.security.userdetails.MyUserDetailsService;
 import ho.seong.cho.users.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import jakarta.annotation.Nullable;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -19,11 +16,9 @@ import java.util.Date;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 @Slf4j
@@ -32,15 +27,14 @@ public class JwtProviderImpl implements JwtProvider {
 
   private final Clock clock;
   private final JwtProperties jwtProperties;
-  private final MyUserDetailsService userDetailsService;
+  private final UserDetailsService userDetailsService;
 
   @Override
   public JsonWebToken create(User user) {
     UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.getName());
-    Authentication authentication = this.userDetailsService.createAuthentication(userDetails);
 
     final Date now = this.getCurrentTime();
-    final String accessToken = this.createAccessToken(authentication, now);
+    final String accessToken = this.createAccessToken(userDetails, now);
     final String refreshToken = this.createRefreshToken(user.getName(), now);
 
     return JsonWebToken.builder()
@@ -58,22 +52,10 @@ public class JwtProviderImpl implements JwtProvider {
 
     // Validations here...
 
-    Authentication authentication = this.userDetailsService.createAuthentication(claims);
     return JsonWebToken.builder()
-        .accessToken(this.createAccessToken(authentication, this.getCurrentTime()))
+        .accessToken(this.createAccessToken(claims, this.getCurrentTime()))
         .accessTokenExpiresIn(ACCESS_TOKEN_EXPIRATION.toSeconds())
         .build();
-  }
-
-  @Override
-  @Nullable public String resolve(HttpServletRequest request) {
-    final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-    if (!StringUtils.hasText(authorization) || !authorization.startsWith(BEARER_PREFIX)) {
-      return null;
-    }
-
-    return authorization.substring(BEARER_PREFIX.length());
   }
 
   @Override
@@ -95,13 +77,25 @@ public class JwtProviderImpl implements JwtProvider {
     }
   }
 
-  private String createAccessToken(Authentication authentication, Date now) {
+  private String createAccessToken(UserDetails userDetails, Date now) {
+    return this.createAccessToken(
+        userDetails.getUsername(),
+        userDetails.getAuthorities().iterator().next().getAuthority(),
+        now);
+  }
+
+  private String createAccessToken(Claims claims, Date now) {
+    return this.createAccessToken(
+        claims.getSubject(), claims.get(AUTHENTICATION_KEY, String.class), now);
+  }
+
+  private String createAccessToken(String username, String claim, Date now) {
     return Jwts.builder()
         .issuer(this.jwtProperties.issuer())
-        .subject(authentication.getName())
+        .subject(username)
         .issuedAt(now)
         .notBefore(now)
-        .claim(AUTHENTICATION_KEY, this.userDetailsService.extractAuthority(authentication))
+        .claim(AUTHENTICATION_KEY, claim)
         .expiration(this.toDate(ACCESS_TOKEN_EXPIRATION))
         .signWith(this.jwtProperties.key())
         .compact();
