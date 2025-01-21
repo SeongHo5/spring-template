@@ -36,7 +36,7 @@ public class RateLimitFilter extends AbstractMySecurityFilter {
     Assert.isTrue(rateLimit.maxRequests() > 0, "maxRequests must be greater than 0");
     Assert.isTrue(rateLimit.duration() > 0, "duration must be greater than 0");
 
-    String key = generateRateLimitKey(request);
+    String key = this.generateRateLimitKey(request);
 
     final boolean isRateLimitExceeded = this.rateLimiter.incrementAndCheckExceeded(key, rateLimit);
 

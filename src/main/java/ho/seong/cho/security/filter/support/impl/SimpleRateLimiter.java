@@ -1,6 +1,7 @@
-package ho.seong.cho.security.filter.support;
+package ho.seong.cho.security.filter.support.impl;
 
 import ho.seong.cho.security.annotation.RateLimit;
+import ho.seong.cho.security.filter.support.RateLimiter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;

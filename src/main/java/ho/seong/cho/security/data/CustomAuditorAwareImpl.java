@@ -1,18 +1,16 @@
-package ho.seong.cho.entity;
+package ho.seong.cho.security.data;
 
+import ho.seong.cho.entity.User;
+import ho.seong.cho.security.MyUserDetails;
 import java.util.Optional;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /** Auditing을 위한 현재 사용자 정보를 제공하는 클래스 */
 @Component
-public class CustomAuditorAware implements AuditorAware<String> {
-
-  private static final String PRINCIPAL_ANONYMOUS_USER = "anonymousUser";
+public class CustomAuditorAwareImpl implements CustomAuditorAware {
 
   /**
    * Spring Security의 {@link SecurityContextHolder}를 사용하여 현재 사용자 정보를 가져온다. <br>
@@ -23,20 +21,24 @@ public class CustomAuditorAware implements AuditorAware<String> {
    */
   @Override
   public Optional<String> getCurrentAuditor() {
+    return this.getCurrentUserDetails().map(MyUserDetails::getUsername);
+  }
+
+  @Override
+  public Optional<User> getCurrentAuditorUser() {
+    return this.getCurrentUserDetails().map(MyUserDetails::getUser);
+  }
+
+  private boolean isNotAnonymous(Authentication authentication) {
+    return !ANONYMOUS_USER.equalsIgnoreCase(authentication.getName());
+  }
+
+  private Optional<MyUserDetails> getCurrentUserDetails() {
     return Optional.of(SecurityContextHolder.getContext())
         .map(SecurityContext::getAuthentication)
         .filter(Authentication::isAuthenticated)
         .filter(this::isNotAnonymous)
         .map(Authentication::getPrincipal)
-        .map(UserDetails.class::cast)
-        .map(UserDetails::getUsername);
-  }
-
-  public String getCurrentAuditorOrAnonymous() {
-    return this.getCurrentAuditor().orElse(PRINCIPAL_ANONYMOUS_USER);
-  }
-
-  private boolean isNotAnonymous(Authentication authentication) {
-    return !PRINCIPAL_ANONYMOUS_USER.equalsIgnoreCase(authentication.getName());
+        .map(MyUserDetails.class::cast);
   }
 }
