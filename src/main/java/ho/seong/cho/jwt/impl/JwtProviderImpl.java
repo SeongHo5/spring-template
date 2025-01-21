@@ -2,10 +2,10 @@ package ho.seong.cho.jwt.impl;
 
 import static ho.seong.cho.jwt.impl.JwtProperties.*;
 
-import ho.seong.cho.entity.User;
 import ho.seong.cho.jwt.JsonWebToken;
 import ho.seong.cho.jwt.JwtProvider;
-import ho.seong.cho.security.MyUserDetailsService;
+import ho.seong.cho.security.userdetails.MyUserDetailsService;
+import ho.seong.cho.users.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

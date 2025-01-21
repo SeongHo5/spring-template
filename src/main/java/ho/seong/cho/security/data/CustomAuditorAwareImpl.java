@@ -1,7 +1,7 @@
 package ho.seong.cho.security.data;
 
-import ho.seong.cho.entity.User;
-import ho.seong.cho.security.MyUserDetails;
+import ho.seong.cho.security.userdetails.MyUserDetails;
+import ho.seong.cho.users.User;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;

@@ -1,6 +1,6 @@
 package ho.seong.cho.security.data;
 
-import ho.seong.cho.entity.User;
+import ho.seong.cho.users.User;
 import java.util.Optional;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,4 +1,4 @@
-package ho.seong.cho.security;
+package ho.seong.cho.security.userdetails;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.Authentication;

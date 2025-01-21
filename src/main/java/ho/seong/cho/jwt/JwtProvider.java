@@ -1,6 +1,6 @@
 package ho.seong.cho.jwt;
 
-import ho.seong.cho.entity.User;
+import ho.seong.cho.users.User;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;

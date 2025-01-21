@@ -1,8 +1,8 @@
 package ho.seong.cho.security.filter.impl;
 
 import ho.seong.cho.jwt.JwtProvider;
-import ho.seong.cho.security.MyUserDetailsService;
 import ho.seong.cho.security.filter.AbstractMySecurityFilter;
+import ho.seong.cho.security.userdetails.MyUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

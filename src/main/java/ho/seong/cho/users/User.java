@@ -1,5 +1,6 @@
-package ho.seong.cho.entity;
+package ho.seong.cho.users;
 
+import ho.seong.cho.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -29,5 +30,17 @@ public class User extends BaseEntity {
   @NotNull @Column(name = "name", nullable = false, length = 100)
   protected String name;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role_type")
+  protected RoleType roleType;
+
   // Other fields(columns)
+
+  public boolean isSuperAdmin() {
+    return this.roleType.isSuperAdmin();
+  }
+
+  public boolean isAdmin() {
+    return this.roleType.isAdmin();
+  }
 }
