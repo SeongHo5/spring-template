@@ -1,7 +1,7 @@
 package ho.seong.cho.entity.converter;
 
 import ho.seong.cho.utils.RandomGenerator;
-import jakarta.annotation.PostConstruct;
+import io.jsonwebtoken.lang.Assert;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.nio.ByteBuffer;
@@ -12,10 +12,13 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 
+/** 문자열 데이터를 AES/GCM 알고리즘을 이용하여 암/복호화하는 JPA {@link AttributeConverter} 구현체 */
 @Converter
-public class StringColumnEncryptionConverter implements AttributeConverter<String, String> {
+public class StringColumnEncryptionConverter
+    implements AttributeConverter<String, String>, InitializingBean {
 
   /** 암호화 알고리즘: AES/GCM/NoPadding */
   private static final String ENCRYPTION_TRANSFORM = "AES/GCM/NoPadding";
@@ -36,8 +39,9 @@ public class StringColumnEncryptionConverter implements AttributeConverter<Strin
   @Value("${service.key.encryption}")
   private String encryptionKey;
 
-  @PostConstruct
-  public void init() {
+  @Override
+  public void afterPropertiesSet() {
+    Assert.notNull(this.encryptionKey, "Encryption key must not be null.");
     this.secretKeySpec = generateAESKey(this.encryptionKey);
   }
 
