@@ -1,6 +1,7 @@
 package ho.seong.cho.security.authentication;
 
 import ho.seong.cho.jwt.JwtProvider;
+import ho.seong.cho.security.userdetails.impl.MyUserDetailsImpl;
 import ho.seong.cho.users.UserService;
 import io.jsonwebtoken.Claims;
 import java.util.Optional;
@@ -27,11 +28,13 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     return Optional.of(authentication)
         .map(JwtAuthenticationToken.class::cast)
-        .map(JwtAuthenticationToken::getToken)
+        .map(JwtAuthenticationToken::getCredentials)
+        .map(Object::toString)
         .flatMap(this.jwtProvider::parse)
         .map(Claims::getSubject)
         .flatMap(this.userService::findByEmail)
-        .map(JwtAuthenticationToken::from)
+        .map(MyUserDetailsImpl::from)
+        .map(JwtAuthenticationToken::authenticated)
         .orElseThrow(() -> new BadCredentialsException("Invalid token"));
   }
 }
