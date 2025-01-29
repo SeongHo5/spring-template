@@ -1,4 +1,4 @@
-package ho.seong.cho.security.common;
+package ho.seong.cho.security.data.enums;
 
 public enum KeyValidation {
   /** API Key 검증 안 함 */

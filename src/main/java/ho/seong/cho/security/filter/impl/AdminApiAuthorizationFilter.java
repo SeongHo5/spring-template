@@ -1,7 +1,7 @@
 package ho.seong.cho.security.filter.impl;
 
 import ho.seong.cho.security.annotation.AdminApi;
-import ho.seong.cho.security.common.AdminAuditEvent;
+import ho.seong.cho.security.data.AdminAuditEvent;
 import ho.seong.cho.security.data.CustomAuditorAware;
 import ho.seong.cho.security.filter.AbstractMySecurityFilter;
 import ho.seong.cho.security.userdetails.MyUserDetails;

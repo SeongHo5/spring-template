@@ -1,4 +1,4 @@
-package ho.seong.cho.security.common;
+package ho.seong.cho.security.data;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

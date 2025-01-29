@@ -1,7 +1,7 @@
 package ho.seong.cho.security.annotation;
 
-import ho.seong.cho.security.common.AccessLevel;
-import ho.seong.cho.security.common.KeyValidation;
+import ho.seong.cho.security.data.enums.AccessLevel;
+import ho.seong.cho.security.data.enums.KeyValidation;
 import java.lang.annotation.*;
 
 @Target({ElementType.TYPE, ElementType.METHOD})

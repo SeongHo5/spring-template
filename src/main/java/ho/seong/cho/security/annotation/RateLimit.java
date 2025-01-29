@@ -1,6 +1,6 @@
 package ho.seong.cho.security.annotation;
 
-import ho.seong.cho.security.common.ExceedAction;
+import ho.seong.cho.security.data.enums.ExceedAction;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,4 +1,4 @@
-package ho.seong.cho.security.common;
+package ho.seong.cho.security.data.enums;
 
 import ho.seong.cho.security.annotation.RateLimit;
 

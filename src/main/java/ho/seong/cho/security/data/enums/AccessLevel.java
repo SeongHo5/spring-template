@@ -1,4 +1,4 @@
-package ho.seong.cho.security.common;
+package ho.seong.cho.security.data.enums;
 
 public enum AccessLevel {
   /** 완전 공개 - 인증, 권한 등 전혀 필요 없음 */
