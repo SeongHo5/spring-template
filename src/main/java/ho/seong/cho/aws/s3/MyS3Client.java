@@ -7,27 +7,29 @@ import org.springframework.web.multipart.MultipartFile;
 public interface MyS3Client {
 
   /**
-   * S3에 업로드된 객체 목록을 조회한다.
+   * 업로드된 객체 목록을 조회한다.
    *
-   * @param directoryPath 조회할 디렉토리 경로({@code items/founds} 형식, 슬래시를 포함하지 않음)
-   * @return S3에 저장된 파일 목록
-   * @apiNote 디렉토리 경로는 반드시 {@code items/founds}와 같은 형식이어야 함.
+   * @param directoryPath 조회할 디렉토리 경로({@code items/founds} 형식)
+   * @return 지정한 디렉토리에 저장된 객체 목록
+   * @throws IllegalArgumentException 디렉토리 경로가 유효하지 않은 경우
    */
   List<String> getListObjects(String directoryPath);
 
   /**
-   * {@code MultipartFile}을 S3에 업로드한다.
+   * {@code MultipartFile}을 업로드한다.
    *
    * @param directoryPath 업로드할 디렉토리 경로
    * @param file 업로드할 파일
-   * @return S3에 저장된 파일의 키
+   * @return 저장된 파일의 URL
+   * @throws IllegalArgumentException 디렉토리 경로가 유효하지 않은 경우
    */
   String upload(String directoryPath, MultipartFile file);
 
   /**
-   * S3에 저장된 파일을 삭제한다.
+   * 저장된 파일을 삭제한다.
    *
    * @param key 삭제할 파일의 키(파일명을 포함한 <strong>**버킷 내 전체 경로**</strong>)
+   * @throws IllegalArgumentException 키가 유효하지 않은 경우
    */
   void delete(String key);
 }
