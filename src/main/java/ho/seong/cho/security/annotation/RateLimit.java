@@ -5,7 +5,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 /** API 요청 제한을 설정하는 어노테이션 */
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -35,7 +35,7 @@ public @interface RateLimit {
    *
    * @return 제한 시간 간격 단위
    */
-  TimeUnit durationUnit() default TimeUnit.MINUTES;
+  ChronoUnit durationUnit() default ChronoUnit.MINUTES;
 
   /**
    * 요청 허용 초과 시 수행할 동작
