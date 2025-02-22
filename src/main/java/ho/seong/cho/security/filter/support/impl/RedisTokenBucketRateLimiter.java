@@ -17,25 +17,43 @@ public class RedisTokenBucketRateLimiter implements RateLimiter {
   /** 토큰 버킷 알고리즘을 구현한 Lua 스크립트 */
   private static final String TOKEN_BUCKET_LUA_SCRIPT =
       """
+        -- 요청 식별자 Key
         local key = KEYS[1]
-        local rate = tonumber(ARGV[1])
-        local capacity = tonumber(ARGV[2])
+
+        -- 버킷의 최대 크기(최대 저장 가능한 토큰 수)
+        local capacity = tonumber(ARGV[1])
+
+        -- 제한 시간 간격(ms)
+        local duration = tonumber(ARGV[2])
+
+        -- 이번 요청에 사용할 토큰 수
+        local requested = 1
+
+        -- 현재 시간
         local now = tonumber(ARGV[3])
-        local requested = tonumber(ARGV[4])
+
+        -- 현재 남은 토큰 수와, 마지막으로 토큰을 충전한 시간을 조회
         local bucket = redis.call('HMGET', key, 'tokens', 'last_refill')
-        local tokens = tonumber(bucket[1]) or capacity
+        local current_tokens = tonumber(bucket[1]) or capacity
         local last_refill = tonumber(bucket[2]) or now
 
-        -- 시간 경과에 따른 토큰 충전
-        local elapsed_time = now - last_refill
-        local new_tokens = math.floor(elapsed_time / 1000 * rate)
-        tokens = math.min(capacity, tokens + new_tokens)
+        -- 토큰이 충분하면 사용
+        if current_tokens >= requested then
+            current_tokens = current_tokens - requested
+            redis.call('HMSET', key, 'tokens', current_tokens, 'last_refill', last_refill)
+            redis.call('EXPIRE', key, duration / 1000)
+            return 1
+        end
 
-        -- 토큰 사용
-        if tokens >= requested then
-            tokens = tokens - requested
-            redis.call('HMSET', key, 'tokens', tokens, 'last_refill', now)
-            redis.call('EXPIRE', key, math.ceil(capacity / rate) + 1)
+        -- 토큰이 부족하면 토큰을 채워넣고, 다시 확인
+        local elapsed_time = now - last_refill
+        local refill_rate = capacity / duration
+        local new_tokens = math.min(capacity, math.floor(current_tokens + (elapsed_time * refill_rate)))
+
+        if new_tokens >= requested then
+            new_tokens = new_tokens - requested
+            redis.call('HMSET', key, 'tokens', new_tokens, 'last_refill', now)
+            redis.call('EXPIRE', key, duration / 1000)
             return 1
         else
             return 0
