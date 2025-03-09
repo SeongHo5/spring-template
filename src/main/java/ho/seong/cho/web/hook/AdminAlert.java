@@ -1,11 +1,10 @@
 package ho.seong.cho.web.hook;
 
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * 해당 메서드가 실행 결과에 따라 관리자가 알림을 받아야 함을 나타내는 어노테이션 <br>
