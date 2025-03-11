@@ -41,7 +41,7 @@ public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
           "SesException occurred while sending email. [Subject: {}] / Reason: {}",
           subject,
           ex.getMessage());
-      throw new RuntimeException();
+      throw new RuntimeException(ex);
     }
   }
 }

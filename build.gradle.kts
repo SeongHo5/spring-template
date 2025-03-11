@@ -23,6 +23,7 @@ dependencyManagement {
 val queryDSLVersion by extra("5.1.0")
 val jjwtVersion by extra("0.12.6")
 val bouncyCastleVersion by extra("1.79")
+val tikaVersion by extra("3.0.0")
 
 repositories {
     mavenCentral()
@@ -54,6 +55,8 @@ dependencies {
     implementation("software.amazon.awssdk:s3")
     implementation("software.amazon.awssdk:ses")
     implementation("software.amazon.awssdk:sns")
+    // Apache Tika
+    implementation("org.apache.tika:tika-core:$tikaVersion")
 }
 
 spotless {

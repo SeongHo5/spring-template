@@ -20,8 +20,20 @@ public interface MyS3Client {
    *
    * @param directoryPath 업로드할 디렉토리 경로
    * @param file 업로드할 파일
+   * @param fileName 업로드할 파일의 이름 (확장자 제외 / 확장자는 파일에서 추출)
    * @return 저장된 파일의 URL
    * @throws IllegalArgumentException 디렉토리 경로가 유효하지 않은 경우
+   */
+  String upload(String directoryPath, String fileName, MultipartFile file);
+
+  /**
+   * {@code MultipartFile}을 업로드한다.
+   *
+   * @param directoryPath 업로드할 디렉토리 경로
+   * @param file 업로드할 파일
+   * @return 저장된 파일의 URL
+   * @throws IllegalArgumentException 디렉토리 경로가 유효하지 않은 경우
+   * @apiNote 이 메서드는 {@link System#currentTimeMillis()} + 확장자로 파일명을 생성한다.
    */
   String upload(String directoryPath, MultipartFile file);
 
@@ -31,5 +43,12 @@ public interface MyS3Client {
    * @param key 삭제할 파일의 키(파일명을 포함한 <strong>**버킷 내 전체 경로**</strong>)
    * @throws IllegalArgumentException 키가 유효하지 않은 경우
    */
-  void delete(String key);
+  void deleteByKey(String key);
+
+  /**
+   * 저장된 파일을 삭제한다.
+   *
+   * @param url 삭제할 파일의 URL
+   */
+  void deleteByUrl(String url);
 }

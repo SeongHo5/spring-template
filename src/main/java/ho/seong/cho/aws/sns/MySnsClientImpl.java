@@ -27,8 +27,8 @@ public class MySnsClientImpl extends AbstractAwsClient implements MySnsClient {
               .message(message)
               .build();
       return this.snsClient.publish(request).messageId();
-    } catch (SnsException e) {
-      throw new RuntimeException(e);
+    } catch (SnsException ex) {
+      throw new RuntimeException(ex);
     }
   }
 }

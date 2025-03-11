@@ -16,11 +16,9 @@ import software.amazon.awssdk.services.s3.model.*;
 
 @Service
 public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
+
   /** S3 경로 구분자 */
   static final String DIRECTORY_DELIMETER = "/";
-
-  /** S3 루트 경로 */
-  static final String ROOT_PATH = "";
 
   /** 디렉토리 경로 정규식 */
   static final Pattern DIRECTORY_PATH_PATTERN =
@@ -48,20 +46,30 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
 
   @Override
   @CacheEvict(value = "S3OBJECTS", key = "#directoryPath", condition = "#result != null")
-  public String upload(final String directoryPath, final MultipartFile file) {
+  public String upload(String directoryPath, String fileName, MultipartFile file) {
     S3Utils.validatePath(directoryPath);
     final String extension = S3Utils.extractExtension(file);
-    final String newFileName = System.currentTimeMillis() + extension;
-    this.putObjectInternal(newFileName, file);
-    return this.buildObjectUrl(newFileName);
+    final String key = directoryPath.concat(DIRECTORY_DELIMETER).concat(fileName).concat(extension);
+    this.putObjectInternal(key, file);
+    return this.buildObjectUrl(key);
   }
 
   @Override
-  public void delete(final String key) {
-    S3Utils.validatePath(key);
+  @CacheEvict(value = "S3OBJECTS", key = "#directoryPath", condition = "#result != null")
+  public String upload(final String directoryPath, final MultipartFile file) {
+    return this.upload(directoryPath, String.valueOf(System.currentTimeMillis()), file);
+  }
+
+  @Override
+  public void deleteByKey(final String key) {
     DeleteObjectRequest request =
         DeleteObjectRequest.builder().bucket(this.awsProperties.s3().bucket()).key(key).build();
     this.deleteObjectInternal(request);
+  }
+
+  @Override
+  public void deleteByUrl(String url) {
+    this.deleteByKey(S3Utils.extractObjectKey(url));
   }
 
   private ListObjectsV2Response getListObjectsInternal(final String path) {
@@ -78,14 +86,12 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
     }
   }
 
-  private void putObjectInternal(final String fileName, final MultipartFile file) {
+  private void putObjectInternal(final String key, final MultipartFile file) {
     try {
       PutObjectRequest request =
-          PutObjectRequest.builder().bucket(this.awsProperties.s3().bucket()).key(fileName).build();
+          PutObjectRequest.builder().bucket(this.awsProperties.s3().bucket()).key(key).build();
       this.s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
-    } catch (IOException e) {
-      throw new RuntimeException(e); // Replace with custom exception
-    } catch (SdkException e) {
+    } catch (SdkException | IOException e) {
       throw new RuntimeException(e);
     }
   }
