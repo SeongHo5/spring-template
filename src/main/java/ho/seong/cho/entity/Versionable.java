@@ -1,9 +1,8 @@
 package ho.seong.cho.entity;
 
-import org.springframework.http.HttpHeaders;
-
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import org.springframework.http.HttpHeaders;
 
 /** HTTP 캐싱을 위한 {@link HttpHeaders#ETAG} / {@link HttpHeaders#LAST_MODIFIED} 값을 제공하는 인터페이스 */
 public interface Versionable {
