@@ -1,5 +1,6 @@
 package ho.seong.cho.security.userdetails.impl;
 
+import ho.seong.cho.security.userdetails.MyUserDetails;
 import ho.seong.cho.users.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +18,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     return this.userService
         .findByEmail(username)
-        .map(MyUserDetailsImpl::from)
+        .map(MyUserDetails::from)
         .orElseThrow(() -> new UsernameNotFoundException("No user found with name: " + username));
   }
 }

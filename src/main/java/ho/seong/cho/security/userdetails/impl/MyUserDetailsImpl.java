@@ -12,10 +12,6 @@ public record MyUserDetailsImpl(User user) implements MyUserDetails, Serializabl
 
   @Serial private static final long serialVersionUID = 2025010101L;
 
-  public static MyUserDetailsImpl from(User user) {
-    return new MyUserDetailsImpl(user);
-  }
-
   @Override
   public User getUser() {
     return this.user;
