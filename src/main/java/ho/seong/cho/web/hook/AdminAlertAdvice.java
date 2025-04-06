@@ -29,7 +29,7 @@ public class AdminAlertAdvice {
     Object methodResult = joinPoint.proceed();
 
     if (shouldNotify(joinPoint, adminAlert, methodResult)) {
-      WebhookProperties.Discord discordProperties = this.webhookProperties.discord();
+      var discordProperties = this.webhookProperties.discord();
       String message = MESSAGE_PREFIX.concat(adminAlert.message());
       this.discordClient.send(
           discordProperties.serverId(), discordProperties.token(), new WebhookRequest(message));

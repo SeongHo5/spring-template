@@ -20,7 +20,7 @@ public final class RandomGenerator {
    * @return 생성된 코드
    */
   public static String nextCode(final int requiredLength) {
-    StringBuilder sb = new StringBuilder(requiredLength);
+    var sb = new StringBuilder(requiredLength);
     for (int i = 0; i < requiredLength; i++) {
       sb.append(CHARACTERS_FOR_CODE.charAt(RANDOM.nextInt(CHARACTERS_FOR_CODE.length())));
     }
