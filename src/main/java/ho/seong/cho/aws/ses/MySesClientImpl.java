@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.ses.model.SesException;
 @Slf4j
 public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
 
+  private static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
+
   private final SesClient sesClient;
 
   public MySesClientImpl(AwsProperties awsProperties, SesClient sesClient) {
@@ -29,11 +31,8 @@ public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
               .destination(d -> d.toAddresses(to))
               .message(
                   m ->
-                      m.subject(s -> s.charset(StandardCharsets.UTF_8.name()).data(subject))
-                          .body(
-                              b ->
-                                  b.html(
-                                      h -> h.charset(StandardCharsets.UTF_8.name()).data(content))))
+                      m.subject(s -> s.charset(DEFAULT_CHARSET).data(subject))
+                          .body(b -> b.html(h -> h.charset(DEFAULT_CHARSET).data(content))))
               .build();
       this.sesClient.sendEmail(request);
     } catch (SesException ex) {

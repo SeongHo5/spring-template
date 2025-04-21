@@ -3,6 +3,7 @@ package ho.seong.cho.aws.s3;
 import ho.seong.cho.aws.AbstractAwsClient;
 import ho.seong.cho.aws.config.AwsProperties;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,6 +14,8 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 @Service
 public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
@@ -28,10 +31,12 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
   private static final int MAX_OBJECTS_PER_REQUEST = 50;
 
   private final S3Client s3Client;
+  private final S3Presigner s3Presigner;
 
-  public MyS3ClientImpl(AwsProperties awsProperties, S3Client s3Client) {
+  public MyS3ClientImpl(AwsProperties awsProperties, S3Client s3Client, S3Presigner s3Presigner) {
     super(awsProperties);
     this.s3Client = s3Client;
+    this.s3Presigner = s3Presigner;
   }
 
   @Override
@@ -42,6 +47,30 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
         .map(S3Object::key)
         .map(this::buildObjectUrl)
         .toList();
+  }
+
+  @Override
+  public String generatePresignedUrl(String key, Duration expiration) {
+    var getObjectPresignedRequest =
+        GetObjectPresignRequest.builder()
+            .signatureDuration(expiration)
+            .getObjectRequest(r -> r.bucket(this.awsProperties.s3().bucket()).key(key))
+            .build();
+
+    return this.s3Presigner.presignGetObject(getObjectPresignedRequest).url().toString();
+  }
+
+  @Override
+  public boolean exists(String key) {
+    try {
+      var headRequest =
+          HeadObjectRequest.builder().bucket(this.awsProperties.s3().bucket()).key(key).build();
+      this.s3Client.headObject(headRequest);
+      return true;
+    } catch (NoSuchKeyException ex) {
+      log.debug("Cannot find object with key: {}/ Reason: {}", key, ex.getMessage());
+      return false;
+    }
   }
 
   @Override
@@ -62,7 +91,7 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
 
   @Override
   public void deleteByKey(final String key) {
-    DeleteObjectRequest request =
+    var request =
         DeleteObjectRequest.builder().bucket(this.awsProperties.s3().bucket()).key(key).build();
     this.deleteObjectInternal(request);
   }
@@ -74,7 +103,7 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
 
   private ListObjectsV2Response getListObjectsInternal(final String path) {
     try {
-      ListObjectsV2Request request =
+      var request =
           ListObjectsV2Request.builder()
               .bucket(this.awsProperties.s3().bucket())
               .prefix(path)
@@ -88,7 +117,7 @@ public class MyS3ClientImpl extends AbstractAwsClient implements MyS3Client {
 
   private void putObjectInternal(final String key, final MultipartFile file) {
     try {
-      PutObjectRequest request =
+      var request =
           PutObjectRequest.builder().bucket(this.awsProperties.s3().bucket()).key(key).build();
       this.s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
     } catch (SdkException | IOException e) {

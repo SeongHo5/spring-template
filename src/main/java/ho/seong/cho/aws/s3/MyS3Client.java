@@ -1,5 +1,6 @@
 package ho.seong.cho.aws.s3;
 
+import java.time.Duration;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,23 @@ public interface MyS3Client {
    * @throws IllegalArgumentException 디렉토리 경로가 유효하지 않은 경우
    */
   List<String> getListObjects(String directoryPath);
+
+  /**
+   * S3 객체에 접근할 수 있는 서명된 URL을 생성한다.
+   *
+   * @param key S3 객체 키
+   * @param expiration URL의 유효 시간
+   * @return 생성된 서명된 URL
+   */
+  String generatePresignedUrl(String key, Duration expiration);
+
+  /**
+   * 주어진 키에 해당하는 S3 객체가 존재하는지 확인한다.
+   *
+   * @param key 확인할 S3 객체 키
+   * @return 객체가 존재하면 {@code true}, 그렇지 않으면 {@code false}
+   */
+  boolean exists(String key);
 
   /**
    * {@code MultipartFile}을 업로드한다.
