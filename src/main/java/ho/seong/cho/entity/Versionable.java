@@ -8,10 +8,10 @@ import org.springframework.http.HttpHeaders;
 public interface Versionable {
 
   /** Constant for GMT Timezone */
-  static final ZoneId GMT_ZONE = ZoneId.of("GMT");
+  ZoneId GMT_ZONE = ZoneId.of("GMT");
 
   /** RFC 1123 Date Time Formatter */
-  static final DateTimeFormatter RFC_1123_FORMAT = DateTimeFormatter.RFC_1123_DATE_TIME;
+  DateTimeFormatter RFC_1123_FORMAT = DateTimeFormatter.RFC_1123_DATE_TIME;
 
   /**
    * 객체의 {@code ETag} 값을 반환한다.

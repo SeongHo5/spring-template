@@ -1,6 +1,5 @@
 package ho.seong.cho.security.web;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -15,7 +14,7 @@ public class MyAuthEntryPoint implements AuthenticationEntryPoint {
       HttpServletRequest request,
       HttpServletResponse response,
       AuthenticationException authException)
-      throws IOException, ServletException {
+      throws IOException {
     if (log.isDebugEnabled()) {
       log.debug("UnAuthorized: {}", authException.getMessage());
     }

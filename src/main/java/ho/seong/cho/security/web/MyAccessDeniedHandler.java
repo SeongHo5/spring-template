@@ -1,6 +1,5 @@
 package ho.seong.cho.security.web;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -10,12 +9,13 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Slf4j
 public class MyAccessDeniedHandler implements AccessDeniedHandler {
+
   @Override
   public void handle(
       HttpServletRequest request,
       HttpServletResponse response,
       AccessDeniedException accessDeniedException)
-      throws IOException, ServletException {
+      throws IOException {
     if (log.isDebugEnabled()) {
       log.debug("Access Denied: {}", accessDeniedException.getMessage());
     }
