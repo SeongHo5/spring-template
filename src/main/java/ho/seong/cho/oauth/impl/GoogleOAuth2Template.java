@@ -7,8 +7,7 @@ import ho.seong.cho.oauth.AbstractOAuth2Template;
 import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
-import ho.seong.cho.oauth.data.token.GoogleOAuth2TokenDto;
-import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
+import ho.seong.cho.oauth.data.token.OAuth2ProviderTokenDto;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,29 +32,29 @@ public class GoogleOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(final String code) {
-    OAuth2Properties.Google googleProperties = this.oAuth2Properties.google();
-    GoogleOAuth2TokenDto tokenDto =
-        this.googleOAuth2Client.issueToken(
-            OAuth2Properties.Google.GRANT_TYPE,
-            googleProperties.clientId(),
-            googleProperties.clientSecret(),
-            googleProperties.redirectUri(),
-            code);
-    final String oAuthId = this.googleUserClient.getUserInfo(tokenDto.getAccessToken()).getId();
-    return super.providerTokenRepository.save(
-        OAuth2ProviderToken.from(OAuth2ProviderType.GOOGLE, oAuthId, tokenDto));
+  protected OAuth2ProviderTokenDto exchangeCodeForToken(String code) {
+    final var googleProperties = this.oAuth2Properties.google();
+    return this.googleOAuth2Client.issueToken(
+        OAuth2Properties.Google.GRANT_TYPE,
+        googleProperties.clientId(),
+        googleProperties.clientSecret(),
+        googleProperties.redirectUri(),
+        code);
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
-    return this.googleUserClient.getUserInfo(accessToken);
+  protected OAuth2UserInfo getUserInfoById(String oAuthId) {
+    return this.getUserInfoByToken(super.loadAccessToken(oAuthId).getAccessToken());
   }
 
   @Override
-  public void withdrawal(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
+  protected OAuth2UserInfo getUserInfoByToken(String token) {
+    return this.googleUserClient.getUserInfo(withBearerPrefix(token));
+  }
+
+  @Override
+  public void disconnect(final String oAuthId) {
+    final var accessToken = super.loadAccessToken(oAuthId).getAccessToken();
     this.googleOAuth2Client.revokeToken(accessToken);
     this.providerTokenRepository.deleteById(oAuthId);
   }

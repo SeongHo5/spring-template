@@ -7,7 +7,6 @@ import ho.seong.cho.oauth.AbstractOAuth2Template;
 import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
-import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderTokenDto;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,32 +33,31 @@ public class KakaoOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(final String code) {
-    OAuth2Properties.Kakao kakaoProperties = this.oAuth2Properties.kakao();
-    OAuth2ProviderTokenDto tokenDto =
-        this.kakaoOAuth2Client.issueOrRenewToken(
-            OAuth2Properties.Kakao.GRANT_TYPE,
-            kakaoProperties.clientId(),
-            kakaoProperties.clientSecret(),
-            kakaoProperties.redirectUri(),
-            code);
-    final String oAuthId =
-        this.kakaoUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).getId();
-    return super.providerTokenRepository.save(
-        OAuth2ProviderToken.from(OAuth2ProviderType.KAKAO, oAuthId, tokenDto));
+  protected OAuth2ProviderTokenDto exchangeCodeForToken(String code) {
+    final var kakaoProperties = this.oAuth2Properties.kakao();
+    return this.kakaoOAuth2Client.issueOrRenewToken(
+        OAuth2Properties.Kakao.GRANT_TYPE,
+        kakaoProperties.clientId(),
+        kakaoProperties.clientSecret(),
+        kakaoProperties.redirectUri(),
+        code);
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
-    return this.kakaoUserClient.getUserInfo(prependBearer(accessToken));
+  protected OAuth2UserInfo getUserInfoById(String oAuthId) {
+    return this.getUserInfoByToken(super.loadAccessToken(oAuthId).getAccessToken());
+  }
+
+  @Override
+  protected OAuth2UserInfo getUserInfoByToken(String token) {
+    return this.kakaoUserClient.getUserInfo(withBearerPrefix(token));
   }
 
   @Override
   @Transactional
-  public void withdrawal(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
-    this.kakaoUserClient.withdrawal(prependBearer(accessToken));
+  public void disconnect(final String oAuthId) {
+    final String accessToken = super.loadAccessToken(oAuthId).getAccessToken();
+    this.kakaoUserClient.withdrawal(withBearerPrefix(accessToken));
     this.providerTokenRepository.deleteById(oAuthId);
   }
 }

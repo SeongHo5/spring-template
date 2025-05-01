@@ -50,14 +50,13 @@ public final class OpenIdConnectTokenUtils {
   /** Modulus와 Exponent를 이용하여 RSA 공개키를 생성한다. */
   private static PublicKey generateRSAPublicKey(String base64Modulus, String base64Exponent) {
     try {
-      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
       byte[] decodedModulus = Base64.getUrlDecoder().decode(base64Modulus);
       byte[] decodedExponent = Base64.getUrlDecoder().decode(base64Exponent);
-      BigInteger modulus = new BigInteger(1, decodedModulus);
-      BigInteger exponent = new BigInteger(1, decodedExponent);
+      var modulus = new BigInteger(1, decodedModulus);
+      var exponent = new BigInteger(1, decodedExponent);
 
-      RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, exponent);
-      return keyFactory.generatePublic(keySpec);
+      var keySpec = new RSAPublicKeySpec(modulus, exponent);
+      return KeyFactory.getInstance("RSA").generatePublic(keySpec);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       log.error("Failed to generate RSA public key / Reason: {}", e.getMessage());
       throw new RuntimeException(e);

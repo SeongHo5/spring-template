@@ -38,7 +38,7 @@ public class OAuthRedirectDispatcher {
 
     handleProviderState.accept(providerType, state);
     final String oAuthId =
-        this.templateFactory.getByProviderType(providerType).issueToken(code).getId();
+        this.templateFactory.getByProviderType(providerType).authorize(code).getId();
 
     return ResponseEntity.status(HttpStatus.FOUND)
         .location(REDIRECT_URI.expand("https://replacement.to-production.com", oAuthId))

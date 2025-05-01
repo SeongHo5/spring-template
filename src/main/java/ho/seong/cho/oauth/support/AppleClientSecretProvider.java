@@ -2,7 +2,6 @@ package ho.seong.cho.oauth.support;
 
 import ho.seong.cho.oauth.OAuth2Properties;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureAlgorithm;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyFactory;
@@ -16,14 +15,11 @@ import java.time.ZoneId;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
 public final class AppleClientSecretProvider {
-
-  private static final SignatureAlgorithm SIGNATURE_ALGORITHM = Jwts.SIG.ES256;
 
   static {
     Security.addProvider(new BouncyCastleProvider());
@@ -60,7 +56,7 @@ public final class AppleClientSecretProvider {
         .add(OAuth2Properties.Apple.AUDIENCE)
         .and()
         .expiration(createExpirationDate())
-        .signWith(getAuthKey(keyPath), SIGNATURE_ALGORITHM)
+        .signWith(getAuthKey(keyPath), Jwts.SIG.ES256)
         .compact();
   }
 
@@ -80,16 +76,14 @@ public final class AppleClientSecretProvider {
   }
 
   private static PrivateKey getAuthKey(final String appleKeyPath) {
-    ClassPathResource resource = new ClassPathResource(appleKeyPath);
+    var resource = new ClassPathResource(appleKeyPath);
 
-    try (PemReader pemReader = new PemReader(new InputStreamReader(resource.getInputStream()))) {
-      PemObject pemObject = pemReader.readPemObject();
+    try (var pemReader = new PemReader(new InputStreamReader(resource.getInputStream()))) {
+      var pemObject = pemReader.readPemObject();
       byte[] keyBytes = pemObject.getContent();
 
-      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-      KeyFactory kf = KeyFactory.getInstance("EC");
-
-      return kf.generatePrivate(spec);
+      var spec = new PKCS8EncodedKeySpec(keyBytes);
+      return KeyFactory.getInstance("EC").generatePrivate(spec);
     } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
       log.error("Failed to read Apple private key / Reason: {}", ex.getMessage());
       throw new RuntimeException(ex);

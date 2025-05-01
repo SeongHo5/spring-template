@@ -34,7 +34,7 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(final String code) {
+  public OAuth2ProviderToken authorize(final String code) {
     OAuth2Properties.Naver naverProperties = this.oAuth2Properties.naver();
     final String state = NaverOAuth2StateHolder.consume();
     OAuth2ProviderTokenDto tokenDto =
@@ -46,20 +46,36 @@ public class NaverOAuth2Template extends AbstractOAuth2Template {
             code,
             state);
     final String oAuthId =
-        this.naverUserClient.getUserInfo(prependBearer(tokenDto.getAccessToken())).getId();
+        this.naverUserClient.getUserInfo(withBearerPrefix(tokenDto.getAccessToken())).getId();
     return super.providerTokenRepository.save(
         OAuth2ProviderToken.from(OAuth2ProviderType.NAVER, oAuthId, tokenDto));
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
-    return this.naverUserClient.getUserInfo(prependBearer(accessToken));
+  protected OAuth2ProviderTokenDto exchangeCodeForToken(String code) {
+    final var naverProperties = this.oAuth2Properties.naver();
+    return this.naverOAuth2Client.issueToken(
+        OAuth2Properties.Naver.GRANT_TYPE_ISSUE,
+        naverProperties.clientId(),
+        naverProperties.clientSecret(),
+        naverProperties.redirectUri(),
+        code,
+        NaverOAuth2StateHolder.consume());
   }
 
   @Override
-  public void withdrawal(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
+  protected OAuth2UserInfo getUserInfoById(String oAuthId) {
+    return this.getUserInfoByToken(super.loadAccessToken(oAuthId).getAccessToken());
+  }
+
+  @Override
+  protected OAuth2UserInfo getUserInfoByToken(String token) {
+    return this.naverUserClient.getUserInfo(withBearerPrefix(token));
+  }
+
+  @Override
+  public void disconnect(final String oAuthId) {
+    final String accessToken = super.loadAccessToken(oAuthId).getAccessToken();
     this.naverOAuth2Client.withdrawal(
         OAuth2Properties.Naver.GRANT_TYPE_WITHDRAWAL,
         this.oAuth2Properties.naver().clientId(),

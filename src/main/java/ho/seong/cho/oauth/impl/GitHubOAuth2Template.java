@@ -34,28 +34,42 @@ public class GitHubOAuth2Template extends AbstractOAuth2Template {
   }
 
   @Override
-  public OAuth2ProviderToken issueToken(final String code) {
-    OAuth2Properties.GitHub gitHubProperties = this.oAuth2Properties.github();
+  public OAuth2ProviderToken authorize(final String code) {
+    final var gitHubProperties = this.oAuth2Properties.github();
     OAuth2ProviderTokenDto tokenDto =
         this.gitHubOAuth2Client.issueToken(
             gitHubProperties.clientId(),
             gitHubProperties.clientSecret(),
             gitHubProperties.redirectUri(),
             code);
-    final String oAuthId = this.gitHubUserClient.getUserInfo(tokenDto.getAccessToken()).getId();
+    final var oAuthId = this.gitHubUserClient.getUserInfo(tokenDto.getAccessToken()).getId();
     return super.providerTokenRepository.save(
         OAuth2ProviderToken.from(OAuth2ProviderType.GITHUB, oAuthId, tokenDto));
   }
 
   @Override
-  public OAuth2UserInfo getUserInfo(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
-    return this.gitHubUserClient.getUserInfo(accessToken);
+  protected OAuth2ProviderTokenDto exchangeCodeForToken(String code) {
+    final var gitHubProperties = this.oAuth2Properties.github();
+    return this.gitHubOAuth2Client.issueToken(
+        gitHubProperties.clientId(),
+        gitHubProperties.clientSecret(),
+        gitHubProperties.redirectUri(),
+        code);
   }
 
   @Override
-  public void withdrawal(final String oAuthId) {
-    final String accessToken = super.findToken(oAuthId).getAccessToken();
+  protected OAuth2UserInfo getUserInfoById(String oAuthId) {
+    return this.getUserInfoByToken(super.loadAccessToken(oAuthId).getAccessToken());
+  }
+
+  @Override
+  protected OAuth2UserInfo getUserInfoByToken(String token) {
+    return this.gitHubUserClient.getUserInfo(withBearerPrefix(token));
+  }
+
+  @Override
+  public void disconnect(final String oAuthId) {
+    final var accessToken = super.loadAccessToken(oAuthId).getAccessToken();
     this.gitHubUserClient.withdrawal(
         this.oAuth2Properties.github().clientId(), OAuth2WithdrawalRequest.from(accessToken));
     this.providerTokenRepository.deleteById(oAuthId);
