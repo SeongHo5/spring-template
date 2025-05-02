@@ -52,16 +52,16 @@ public class StringColumnEncryptionConverter
    * @return 암호화된 문자열, 원본 데이터가 {@code null}인 경우 {@code null} 반환
    */
   @Override
-  public String convertToDatabaseColumn(String attribute) {
+  public String convertToDatabaseColumn(final String attribute) {
     if (attribute == null) {
       return null;
     }
     try {
       final byte[] initialVector = RandomGenerator.nextBytes(INITIAL_VECTOR_LENGTH);
 
-      Cipher cipher = initCipher(Cipher.ENCRYPT_MODE, this.secretKeySpec, initialVector);
-      byte[] encryptedData = cipher.doFinal(attribute.getBytes(DEFAULT_ENCODING));
-      byte[] encryptedWithIv =
+      final var cipher = initCipher(Cipher.ENCRYPT_MODE, this.secretKeySpec, initialVector);
+      final byte[] encryptedData = cipher.doFinal(attribute.getBytes(DEFAULT_ENCODING));
+      final byte[] encryptedWithIv =
           ByteBuffer.allocate(initialVector.length + encryptedData.length)
               .put(initialVector)
               .put(encryptedData)
@@ -84,22 +84,22 @@ public class StringColumnEncryptionConverter
    * @return 복호화된 원본 문자열, 데이터가 {@code null}인 경우 {@code null} 반환
    */
   @Override
-  public String convertToEntityAttribute(String dbData) {
+  public String convertToEntityAttribute(final String dbData) {
     if (dbData == null) {
       return null;
     }
     try {
-      byte[] decodedData = DECODER.decode(dbData);
-      ByteBuffer byteBuffer = ByteBuffer.wrap(decodedData);
+      final byte[] decodedData = DECODER.decode(dbData);
+      final var byteBuffer = ByteBuffer.wrap(decodedData);
 
-      byte[] initialVector = new byte[INITIAL_VECTOR_LENGTH];
+      final byte[] initialVector = new byte[INITIAL_VECTOR_LENGTH];
       byteBuffer.get(initialVector);
 
-      byte[] encryptedData = new byte[byteBuffer.remaining()];
+      final byte[] encryptedData = new byte[byteBuffer.remaining()];
       byteBuffer.get(encryptedData);
 
-      Cipher cipher = initCipher(Cipher.DECRYPT_MODE, this.secretKeySpec, initialVector);
-      byte[] decryptedData = cipher.doFinal(encryptedData);
+      final var cipher = initCipher(Cipher.DECRYPT_MODE, this.secretKeySpec, initialVector);
+      final byte[] decryptedData = cipher.doFinal(encryptedData);
       return new String(decryptedData, DEFAULT_ENCODING);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException("Failed to decrypt data.", e);
@@ -116,8 +116,8 @@ public class StringColumnEncryptionConverter
    */
   private static Cipher initCipher(final int mode, SecretKeySpec secretKeySpec, final byte[] iv) {
     try {
-      Cipher cipher = Cipher.getInstance(ENCRYPTION_TRANSFORM);
-      final GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, iv);
+      var cipher = Cipher.getInstance(ENCRYPTION_TRANSFORM);
+      var gcmParameterSpec = new GCMParameterSpec(128, iv);
       cipher.init(mode, secretKeySpec, gcmParameterSpec);
       return cipher;
     } catch (GeneralSecurityException e) {

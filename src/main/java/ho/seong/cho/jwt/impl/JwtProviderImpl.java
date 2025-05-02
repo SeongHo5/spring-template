@@ -33,9 +33,9 @@ public class JwtProviderImpl implements JwtProvider {
   public JsonWebToken create(User user) {
     UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.getName());
 
-    final Date now = this.getCurrentTime();
-    final String accessToken = this.createAccessToken(userDetails, now);
-    final String refreshToken = this.createRefreshToken(user.getName(), now);
+    final var now = this.getCurrentDate();
+    final var accessToken = this.createAccessToken(userDetails, now);
+    final var refreshToken = this.createRefreshToken(user.getName(), now);
 
     return JsonWebToken.builder()
         .accessToken(accessToken)
@@ -53,7 +53,7 @@ public class JwtProviderImpl implements JwtProvider {
     // Validations here...
 
     return JsonWebToken.builder()
-        .accessToken(this.createAccessToken(claims, this.getCurrentTime()))
+        .accessToken(this.createAccessToken(claims, this.getCurrentDate()))
         .accessTokenExpiresIn(ACCESS_TOKEN_EXPIRATION.toSeconds())
         .build();
   }
@@ -116,7 +116,7 @@ public class JwtProviderImpl implements JwtProvider {
     return Date.from(Instant.now(this.clock).plus(duration));
   }
 
-  private Date getCurrentTime() {
+  private Date getCurrentDate() {
     return Date.from(Instant.now(this.clock));
   }
 }

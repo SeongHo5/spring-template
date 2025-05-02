@@ -10,7 +10,7 @@ import java.util.List;
 public record OAuth2ProviderJsonWebKeys(List<JsonWebKey> keys) {
 
   /**
-   * JWT Web Key
+   * Json Web Key
    *
    * @param alg 토큰 암호화에 사용된 알고리즘
    * @param e RSA 공개 지수

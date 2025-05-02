@@ -8,7 +8,6 @@ import ho.seong.cho.oauth.OAuth2Properties;
 import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.enums.OAuth2ProviderType;
 import ho.seong.cho.oauth.data.internal.OAuth2WithdrawalRequest;
-import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderTokenDto;
 import org.springframework.stereotype.Component;
 
@@ -31,20 +30,6 @@ public class GitHubOAuth2Template extends AbstractOAuth2Template {
   @Override
   public OAuth2ProviderType getProviderType() {
     return OAuth2ProviderType.GITHUB;
-  }
-
-  @Override
-  public OAuth2ProviderToken authorize(final String code) {
-    final var gitHubProperties = this.oAuth2Properties.github();
-    OAuth2ProviderTokenDto tokenDto =
-        this.gitHubOAuth2Client.issueToken(
-            gitHubProperties.clientId(),
-            gitHubProperties.clientSecret(),
-            gitHubProperties.redirectUri(),
-            code);
-    final var oAuthId = this.gitHubUserClient.getUserInfo(tokenDto.getAccessToken()).getId();
-    return super.providerTokenRepository.save(
-        OAuth2ProviderToken.from(OAuth2ProviderType.GITHUB, oAuthId, tokenDto));
   }
 
   @Override

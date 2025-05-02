@@ -34,10 +34,10 @@ public class OAuthRedirectDispatcher {
       @PathVariable String provider,
       @RequestParam String code,
       @RequestParam(required = false) String state) {
-    final OAuth2ProviderType providerType = OAuth2ProviderType.from(provider);
+    final var providerType = OAuth2ProviderType.findByName(provider).orElseThrow();
 
     handleProviderState.accept(providerType, state);
-    final String oAuthId =
+    final var oAuthId =
         this.templateFactory.getByProviderType(providerType).authorize(code).getId();
 
     return ResponseEntity.status(HttpStatus.FOUND)

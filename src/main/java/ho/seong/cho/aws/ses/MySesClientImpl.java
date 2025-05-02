@@ -25,7 +25,7 @@ public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
   @Override
   public void send(final String to, final String subject, final String content) {
     try {
-      SendEmailRequest request =
+      var request =
           SendEmailRequest.builder()
               .source(this.awsProperties.ses().from())
               .destination(d -> d.toAddresses(to))

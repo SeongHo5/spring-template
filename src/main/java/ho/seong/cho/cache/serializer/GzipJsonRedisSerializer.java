@@ -13,13 +13,9 @@ import org.springframework.data.redis.serializer.SerializationException;
 public class GzipJsonRedisSerializer<T> implements RedisSerializer<T> {
 
   private static final byte[] GZIP_MAGIC_NUMBER = new byte[] {0x1f, (byte) 0x8b};
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private final Class<T> targetType;
-  private final ObjectMapper mapper;
-
-  public GzipJsonRedisSerializer(Class<T> targetType) {
-    this(targetType, new ObjectMapper());
-  }
 
   @Override
   public byte[] serialize(T value) throws SerializationException {
@@ -27,9 +23,9 @@ public class GzipJsonRedisSerializer<T> implements RedisSerializer<T> {
       return new byte[0];
     }
 
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GZIPOutputStream gzipos = new GZIPOutputStream(baos)) {
-      this.mapper.writeValue(gzipos, value);
+    try (var baos = new ByteArrayOutputStream();
+        var gzipos = new GZIPOutputStream(baos)) {
+      MAPPER.writeValue(gzipos, value);
       gzipos.finish();
 
       return baos.toByteArray();
@@ -44,12 +40,12 @@ public class GzipJsonRedisSerializer<T> implements RedisSerializer<T> {
       return null;
     }
 
-    try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+    try (var bais = new ByteArrayInputStream(bytes)) {
       if (isGzip(bytes)) {
-        return this.mapper.readValue(bais, this.targetType);
+        return MAPPER.readValue(bais, this.targetType);
       }
 
-      return this.mapper.readValue(bytes, this.targetType);
+      return MAPPER.readValue(bytes, this.targetType);
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }

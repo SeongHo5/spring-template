@@ -20,7 +20,7 @@ public class MySnsClientImpl extends AbstractAwsClient implements MySnsClient {
   @Override
   public String broadcast(final String subject, final String message) {
     try {
-      PublishRequest request =
+      var request =
           PublishRequest.builder()
               .topicArn(this.awsProperties.sns().topicArn())
               .subject(subject)

@@ -92,7 +92,6 @@ public abstract class AbstractOAuth2Template implements OAuth2Template {
    *
    * @param oAuthId 사용자 식별자 (OAuth2 ID)
    * @return 외부 OAuth2 제공자에서 조회된 사용자 정보
-   * @throws RuntimeException 저장된 토큰이 존재하지 않거나 조회에 실패한 경우
    */
   protected abstract OAuth2UserInfo getUserInfoById(String oAuthId);
 
