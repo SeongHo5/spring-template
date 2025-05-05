@@ -49,7 +49,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
   }
 
   private boolean isNotExpired(Claims claims) {
-    Instant expirationTime = claims.getExpiration().toInstant();
+    var expirationTime = claims.getExpiration().toInstant();
     return Instant.now().isBefore(expirationTime);
   }
 }

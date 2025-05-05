@@ -38,7 +38,7 @@ public class RateLimitFilter extends AbstractMySecurityFilter {
 
     String key = this.generateRateLimitKey(request);
 
-    final boolean isRateLimitExceeded = this.rateLimiter.incrementAndCheckExceeded(key, rateLimit);
+    final boolean isRateLimitExceeded = this.rateLimiter.tryConsume(key, rateLimit);
 
     if (this.needsRateLimitHandling(isRateLimitExceeded, rateLimit)) {
       this.doHandle(response, rateLimit);

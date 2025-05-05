@@ -89,8 +89,8 @@ public class AdminApiAuthorizationFilter extends AbstractMySecurityFilter {
       HttpServletResponse response,
       AdminApi adminApi,
       boolean isSuccessful) {
-    String username = this.auditorAware.getCurrentAuditorOrAnonymous();
-    AdminAuditEvent auditEvent =
+    final var username = this.auditorAware.getCurrentAuditorOrAnonymous();
+    final var auditEvent =
         AdminAuditEvent.builder()
             .email(username)
             .superAdminOnly(adminApi.superAdminOnly())

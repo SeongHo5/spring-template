@@ -46,10 +46,10 @@ public class JwtAuthenticationFilter extends AbstractMySecurityFilter {
   }
 
   private void setAuthentication(String token) {
-    Authentication authentication =
+    final var authentication =
         this.authenticationProvider.authenticate(new JwtAuthenticationToken(token));
 
-    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+    final var securityContext = SecurityContextHolder.createEmptyContext();
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
   }
