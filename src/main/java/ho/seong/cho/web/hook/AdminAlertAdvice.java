@@ -30,7 +30,7 @@ public class AdminAlertAdvice {
 
     if (shouldNotify(joinPoint, adminAlert, methodResult)) {
       var discordProperties = this.webhookProperties.discord();
-      String message = MESSAGE_PREFIX.concat(adminAlert.message());
+      var message = MESSAGE_PREFIX.concat(adminAlert.message());
       this.discordClient.send(
           discordProperties.serverId(), discordProperties.token(), new WebhookRequest(message));
     }
@@ -40,7 +40,7 @@ public class AdminAlertAdvice {
 
   private static boolean shouldNotify(
       ProceedingJoinPoint joinPoint, AdminAlert requireAdminNotify, Object methodResult) {
-    String condition = requireAdminNotify.condition();
+    var condition = requireAdminNotify.condition();
     return StringUtils.isBlank(condition) || evaluateCondition(condition, joinPoint, methodResult);
   }
 

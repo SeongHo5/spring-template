@@ -17,7 +17,7 @@ public class RedisConfig {
   private final RedisProperties redisProperties;
 
   @Bean
-  public RedisTemplate<?, ?> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+  public RedisTemplate<byte[], byte[]> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<byte[], byte[]> redisTemplate = new RedisTemplate<>();
     redisTemplate.setConnectionFactory(redisConnectionFactory);
     redisTemplate.setEnableTransactionSupport(true);
@@ -29,7 +29,7 @@ public class RedisConfig {
   protected RedisConnectionFactory redisConnectionFactory() {
     final String host = this.redisProperties.host();
     final Integer port = this.redisProperties.port();
-    RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host, port);
+    var configuration = new RedisStandaloneConfiguration(host, port);
     return new LettuceConnectionFactory(configuration);
   }
 }
