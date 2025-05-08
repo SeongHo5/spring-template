@@ -9,7 +9,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtProviderImpl implements JwtProvider {
 
-  private final Clock clock;
   private final JwtProperties jwtProperties;
   private final UserDetailsService userDetailsService;
 
@@ -113,10 +111,10 @@ public class JwtProviderImpl implements JwtProvider {
   }
 
   private Date toDate(Duration duration) {
-    return Date.from(Instant.now(this.clock).plus(duration));
+    return Date.from(Instant.now().plus(duration));
   }
 
   private Date getCurrentDate() {
-    return Date.from(Instant.now(this.clock));
+    return Date.from(Instant.now());
   }
 }
