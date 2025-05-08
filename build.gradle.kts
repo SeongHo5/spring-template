@@ -55,6 +55,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3")
     implementation("software.amazon.awssdk:ses")
     implementation("software.amazon.awssdk:sns")
+    implementation("software.amazon.awssdk:dynamodb")
     // Apache Tika
     implementation("org.apache.tika:tika-core:$tikaVersion")
 }
