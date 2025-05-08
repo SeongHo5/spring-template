@@ -17,7 +17,8 @@ public class RedisConfig {
   private final RedisProperties redisProperties;
 
   @Bean
-  public RedisTemplate<byte[], byte[]> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+  public RedisTemplate<byte[], byte[]> redisTemplate(
+      RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<byte[], byte[]> redisTemplate = new RedisTemplate<>();
     redisTemplate.setConnectionFactory(redisConnectionFactory);
     redisTemplate.setEnableTransactionSupport(true);
