@@ -19,7 +19,7 @@ public abstract class AbstractJpaRepositoryAware<T extends JpaRepository<? exten
    * 사용할 {@link JpaRepository} 타입을 반환한다.
    *
    * @return 주입받을 {@link JpaRepository} 타입
-   * @implNote 구현체에서는 해당 메서드를 구현하여 사용할 {@link JpaRepository} 타입을 반환해야 한다.
+   * @implSpec 구현체에서는 해당 메서드를 구현하여 사용할 {@link JpaRepository} 타입을 반환해야 한다.
    */
   protected abstract Class<T> repositoryType();
 

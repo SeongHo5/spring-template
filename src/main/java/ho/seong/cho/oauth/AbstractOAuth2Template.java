@@ -8,13 +8,9 @@ import ho.seong.cho.oauth.data.entity.OAuth2UserInfo;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderToken;
 import ho.seong.cho.oauth.data.token.OAuth2ProviderTokenDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public abstract class AbstractOAuth2Template implements OAuth2Template {
-
-  protected static final Logger log = LoggerFactory.getLogger(AbstractOAuth2Template.class);
 
   protected final OAuth2Properties oAuth2Properties;
   protected final OAuth2ProviderTokenRepository providerTokenRepository;
@@ -24,7 +20,7 @@ public abstract class AbstractOAuth2Template implements OAuth2Template {
    *
    * @param oAuthId 확인할 사용자의 OAuth ID
    * @return 사용자가 인증되었는지 여부
-   * @apiNote Cache에 저장된 유효한 OAuth 제공자 토큰이 있는지 여부로 확인한다.
+   * @apiNote 캐시에 저장된 유효한 OAuth 제공자 토큰이 있는지 여부로 확인한다.
    */
   @Override
   public boolean isAuthorized(final String oAuthId) {
@@ -50,7 +46,7 @@ public abstract class AbstractOAuth2Template implements OAuth2Template {
    *
    * @param oAuthId 사용자의 OAuth ID
    * @return 사용자 정보
-   * @apiNote Cache에 저장된 토큰을 사용하여 사용자 정보를 가져온다.
+   * @apiNote 캐시에 저장된 토큰을 사용하여 사용자 정보를 가져온다.
    * @throws NoSuchEntityException OAuth ID에 해당하는 토큰이 없을 경우
    */
   @Override
