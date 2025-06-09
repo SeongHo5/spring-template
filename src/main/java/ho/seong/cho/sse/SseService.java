@@ -12,7 +12,7 @@ public interface SseService {
    * @param userId 사용자 ID
    * @return 생성된 {@link SseEmitter} 객체
    */
-  SseEmitter connect(SseType type, long userId);
+  SseEmitter connect(long userId);
 
   /**
    * 특정 사용자와 연결을 종료한다.
@@ -20,14 +20,7 @@ public interface SseService {
    * @param type 이벤트 유형
    * @param userId 사용자 ID
    */
-  void disconnect(SseType type, long userId);
-
-  /**
-   * 주어진 {@link SseEmitter} 객체의 연결을 종료한다.
-   *
-   * @param emitter 종료할 {@link SseEmitter} 객체
-   */
-  void disconnect(SseEmitter emitter);
+  void disconnect(long userId);
 
   /**
    * 특정 이벤트 유형을 구독 중인 모든 사용자에게 이벤트 데이터를 전송한다.
@@ -35,7 +28,7 @@ public interface SseService {
    * @param type 이벤트 유형
    * @param data 전송할 데이터
    */
-  void broadcast(SseType type, Object data);
+  void broadcast(SseEvent event);
 
   /**
    * 특정 사용자에게 특정 이벤트 유형을 구독 중인 사용자에게 이벤트 데이터를 전송한다.
@@ -43,5 +36,5 @@ public interface SseService {
    * @param type 이벤트 유형
    * @param userId 사용자 ID
    */
-  void unicast(SseType type, long userId, Object data);
+  void unicast(long userId, SseEvent event);
 }
