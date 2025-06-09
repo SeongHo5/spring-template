@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.ses.SesClient;
@@ -45,6 +46,14 @@ public class AwsConfig {
   @Bean
   public SnsClient snsClient(AwsBasicCredentials basicCredentials) {
     return SnsClient.builder()
+        .region(Region.of(this.awsProperties.region()))
+        .credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
+        .build();
+  }
+
+  @Bean
+  public DynamoDbClient dynamoDbClient(AwsBasicCredentials basicCredentials) {
+    return DynamoDbClient.builder()
         .region(Region.of(this.awsProperties.region()))
         .credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
         .build();

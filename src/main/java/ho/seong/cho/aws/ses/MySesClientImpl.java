@@ -4,6 +4,7 @@ import ho.seong.cho.aws.AbstractAwsClient;
 import ho.seong.cho.aws.config.AwsProperties;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
@@ -30,9 +31,16 @@ public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
               .source(this.awsProperties.ses().from())
               .destination(d -> d.toAddresses(to))
               .message(
-                  m ->
-                      m.subject(s -> s.charset(DEFAULT_CHARSET).data(subject))
-                          .body(b -> b.html(h -> h.charset(DEFAULT_CHARSET).data(content))))
+                  message ->
+                      message
+                          .subject(s -> s.charset(DEFAULT_CHARSET).data(subject))
+                          .body(
+                              body ->
+                                  body.html(html -> html.charset(DEFAULT_CHARSET).data(content))
+                                      .text(
+                                          text ->
+                                              text.charset(DEFAULT_CHARSET)
+                                                  .data(stripHtml(content)))))
               .build();
       this.sesClient.sendEmail(request);
     } catch (SesException ex) {
@@ -42,5 +50,9 @@ public class MySesClientImpl extends AbstractAwsClient implements MySesClient {
           ex.getMessage());
       throw new RuntimeException(ex);
     }
+  }
+
+  private static String stripHtml(String html) {
+    return html == null ? null : Jsoup.parse(html).text();
   }
 }

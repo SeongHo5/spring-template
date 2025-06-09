@@ -20,10 +20,11 @@ dependencyManagement {
     }
 }
 
-val queryDSLVersion by extra("5.1.0")
 val jjwtVersion by extra("0.12.6")
 val bouncyCastleVersion by extra("1.79")
 val tikaVersion by extra("3.0.0")
+val j2htmlVersion by extra("1.6.0")
+val jsoupVersion by extra("1.20.1")
 
 repositories {
     mavenCentral()
@@ -31,6 +32,7 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot Starter
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -42,14 +44,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.boot:spring-boot-configuration-processor")
+    // Lombok
+    implementation("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+    // Bouncy Castle
     implementation("org.bouncycastle:bcprov-jdk18on:$bouncyCastleVersion")
-    // Lombok
-    implementation("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     // AWS SDK
     implementation(platform("software.amazon.awssdk:bom:2.24.0"))
     implementation("software.amazon.awssdk:s3")
@@ -58,6 +61,9 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb")
     // Apache Tika
     implementation("org.apache.tika:tika-core:$tikaVersion")
+    // HTML
+    implementation("com.j2html:j2html:$j2htmlVersion")
+    implementation("org.jsoup:jsoup:$jsoupVersion")
 }
 
 spotless {
