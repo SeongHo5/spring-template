@@ -21,6 +21,7 @@ dependencyManagement {
 }
 
 val jjwtVersion by extra("0.12.6")
+var kafkaClientVersion by extra("3.3.0")
 val bouncyCastleVersion by extra("1.79")
 val tikaVersion by extra("3.0.0")
 val j2htmlVersion by extra("1.6.0")
@@ -51,6 +52,8 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     implementation("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+    // Apache Kafka
+    implementation("org.springframework.kafka:spring-kafka:$kafkaClientVersion")
     // Bouncy Castle
     implementation("org.bouncycastle:bcprov-jdk18on:$bouncyCastleVersion")
     // AWS SDK
