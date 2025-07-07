@@ -7,11 +7,11 @@ import java.lang.annotation.Annotation;
 public abstract class CustomConstraintValidator<A extends Annotation, T>
     implements ConstraintValidator<A, T> {
 
-  protected boolean isRequired;
+  protected boolean required;
 
   @Override
   public boolean isValid(T value, ConstraintValidatorContext context) {
-    if (!this.isRequired && value == null) {
+    if (!this.required && value == null) {
       return true; // 필수가 아니고 값이 null이면 유효하다고 판단
     }
     // 필수이거나 값이 null이 아닌 경우 구현체별 유효성 검사 수행

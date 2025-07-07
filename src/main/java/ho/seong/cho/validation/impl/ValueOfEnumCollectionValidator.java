@@ -19,7 +19,7 @@ public class ValueOfEnumCollectionValidator
         Stream.of(constraintAnnotation.type().getEnumConstants())
             .map(Enum::name)
             .collect(Collectors.toUnmodifiableSet());
-    this.isRequired = constraintAnnotation.required();
+    this.required = constraintAnnotation.required();
   }
 
   @Override

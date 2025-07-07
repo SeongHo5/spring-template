@@ -11,7 +11,7 @@ public class AgeValidator extends CustomConstraintValidator<Age, Number> {
 
   @Override
   public void initialize(Age constraintAnnotation) {
-    this.isRequired = constraintAnnotation.required();
+    this.required = constraintAnnotation.required();
   }
 
   @Override

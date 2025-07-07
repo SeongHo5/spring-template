@@ -12,7 +12,7 @@ public class KakaoOpenChatUrlValidator extends CustomConstraintValidator<KakaoOp
 
   @Override
   public void initialize(KakaoOpenChatUrl constraintAnnotation) {
-    this.isRequired = constraintAnnotation.required();
+    this.required = constraintAnnotation.required();
   }
 
   @Override

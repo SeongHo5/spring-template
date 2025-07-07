@@ -11,7 +11,7 @@ public class PasswordValidator extends CustomConstraintValidator<Nickname, Strin
 
   @Override
   public void initialize(Nickname constraintAnnotation) {
-    this.isRequired = constraintAnnotation.required();
+    this.required = constraintAnnotation.required();
   }
 
   @Override
