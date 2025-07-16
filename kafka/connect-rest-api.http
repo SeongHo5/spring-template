@@ -1,0 +1,31 @@
+### 설치된 플러그인 조회
+GET http://localhost:10004/connector-plugins
+
+### 커넥터 등록
+POST http://localhost:10004/connectors
+Content-Type: application/json
+
+{
+  "name": "sink-mariadb",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "2",
+    "topics": "presence.connect-test01",
+    "connection.url": "jdbc:mysql://mariadb:3306/pntbiz_beacon",
+    "connection.user": "pntbiz",
+    "connection.password": "mypassword",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "${topic}",
+    "pk.mode": "record_key",
+    "pk.fields": "id",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false"
+  }
+}
+
+### 커넥터 조회
+GET http://localhost:10004/connectors
+
