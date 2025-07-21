@@ -1,4 +1,4 @@
-package ho.seong.cho.aws.sns;
+package ho.seong.cho.infra.aws.sns;
 
 public interface MySnsClient {
 

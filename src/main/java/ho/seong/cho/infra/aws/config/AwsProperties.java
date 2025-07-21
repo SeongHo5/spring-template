@@ -1,4 +1,4 @@
-package ho.seong.cho.aws.config;
+package ho.seong.cho.infra.aws.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

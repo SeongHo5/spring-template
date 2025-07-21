@@ -1,6 +1,6 @@
-package ho.seong.cho.aws;
+package ho.seong.cho.infra.aws;
 
-import ho.seong.cho.aws.config.AwsProperties;
+import ho.seong.cho.infra.aws.config.AwsProperties;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

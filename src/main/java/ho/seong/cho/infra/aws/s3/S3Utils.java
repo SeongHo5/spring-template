@@ -1,6 +1,6 @@
-package ho.seong.cho.aws.s3;
+package ho.seong.cho.infra.aws.s3;
 
-import static ho.seong.cho.aws.s3.MyS3ClientImpl.DIRECTORY_PATH_PATTERN;
+import static ho.seong.cho.infra.aws.s3.MyS3ClientImpl.DIRECTORY_PATH_PATTERN;
 
 import io.jsonwebtoken.lang.Assert;
 import jakarta.validation.constraints.NotNull;

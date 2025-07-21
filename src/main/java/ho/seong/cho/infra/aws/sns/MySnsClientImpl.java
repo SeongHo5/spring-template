@@ -1,7 +1,7 @@
-package ho.seong.cho.aws.sns;
+package ho.seong.cho.infra.aws.sns;
 
-import ho.seong.cho.aws.AbstractAwsClient;
-import ho.seong.cho.aws.config.AwsProperties;
+import ho.seong.cho.infra.aws.AbstractAwsClient;
+import ho.seong.cho.infra.aws.config.AwsProperties;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;

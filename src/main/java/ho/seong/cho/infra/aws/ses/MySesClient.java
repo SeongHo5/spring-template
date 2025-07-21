@@ -1,4 +1,4 @@
-package ho.seong.cho.aws.ses;
+package ho.seong.cho.infra.aws.ses;
 
 public interface MySesClient {
 
