@@ -37,8 +37,10 @@ spring-template/
 │   │       ├── security/                         # Spring Security
 │   │       │   └── ...
 │   │       │
-│   │       ├── validation/                       # 외부 시스템 어댑터 계층
-│   │       │   └── ...
+│   │       ├── validation/                       # Validation
+│   │       │   ├── annotation
+│   │       │   ├── impl                          # 구현체 
+│   │       │   └── CustomConstraintValidator     # Validator 추상 클래스
 │   │       └ ...
 │   │
 │   └── resources/
