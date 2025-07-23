@@ -27,7 +27,7 @@ spring-template/
 │   │       │   │   ├── s3/                       # S3 처리 모듈
 │   │       │   │   └── ses/                      # SES 처리 모듈
 │   │       │   │   └── ...                       # 공통 서비스
-│   │       │   ├── redis/                        # 
+│   │       │   ├── redis/                        # Redis Config, @RedisHash repositories
 │   │       │   ├── kafka/                        # 
 │   │       │   └── client/                       # 외부 클라이언트 모듈
 │   │       │       ├── http/                     # OpenFeign 기반 HTTP 클라이언트 인터페이스
