@@ -20,6 +20,7 @@ dependencyManagement {
     }
 }
 
+val redissonVerseion by extra("3.41.0")
 val jjwtVersion by extra("0.12.6")
 var kafkaClientVersion by extra("3.3.0")
 val bouncyCastleVersion by extra("1.79")
@@ -40,6 +41,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.redisson:redisson-spring-boot-starter:$redissonVerseion")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
