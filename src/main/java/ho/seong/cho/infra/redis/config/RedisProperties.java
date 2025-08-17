@@ -2,6 +2,9 @@ package ho.seong.cho.infra.redis.config;
 
 import jakarta.annotation.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.web.util.UriTemplate;
+
+import java.net.URI;
 
 /**
  * Redis 서버 설정 정보
@@ -11,4 +14,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @param password 서버 비밀번호 <i>(nullable)</i>
  */
 @ConfigurationProperties(prefix = "spring.data.redis")
-public record RedisProperties(String host, Integer port, @Nullable String password) {}
+public record RedisProperties(String host, Integer port, @Nullable String password) {
+
+  private static final UriTemplate REDIS_ADDRESS = new UriTemplate("redis://{host}:{port}");
+
+  public URI address() {
+   return  REDIS_ADDRESS.expand(this.host, this.port);
+  }
+}
