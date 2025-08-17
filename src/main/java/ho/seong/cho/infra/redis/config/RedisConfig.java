@@ -11,7 +11,6 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.web.util.UriTemplate;
 
 @Configuration
 @EnableRedisRepositories(basePackages = "ho.seong.cho.infra.redis")
@@ -23,7 +22,8 @@ public class RedisConfig {
   @Bean
   public RedissonClient redissonClient() {
     Config config = new Config();
-    config.useSingleServer()
+    config
+        .useSingleServer()
         .setAddress(this.redisProperties.address().toString())
         .setPassword(this.redisProperties.password());
     return Redisson.create(config);

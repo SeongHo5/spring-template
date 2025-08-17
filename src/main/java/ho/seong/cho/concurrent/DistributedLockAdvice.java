@@ -1,6 +1,8 @@
 package ho.seong.cho.concurrent;
 
 import ho.seong.cho.utils.MySpelParser;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,9 +12,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -51,15 +50,15 @@ public class DistributedLockAdvice {
       ProceedingJoinPoint joinPoint, DistributedLock distributedLock) {
     String key =
         MySpelParser.getDynamicValue(
-            preprocessKeyExpression(distributedLock.keyName()),
+                preprocessKeyExpression(distributedLock.keyName()),
                 ((MethodSignature) joinPoint.getSignature()).getParameterNames(),
-                joinPoint.getArgs()
-                )
+                joinPoint.getArgs())
             .toString();
     return REDISSON_KEY_PREFIX + key;
   }
 
-  private boolean tryAcquiringLock(RLock lock, DistributedLock distributedLock) throws InterruptedException {
+  private boolean tryAcquiringLock(RLock lock, DistributedLock distributedLock)
+      throws InterruptedException {
     return lock.tryLock(
         distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit());
   }
@@ -69,6 +68,4 @@ public class DistributedLockAdvice {
         .map(token -> token.startsWith("#") ? token : "\"" + token + "\"")
         .collect(Collectors.joining(" + "));
   }
-
-
 }
