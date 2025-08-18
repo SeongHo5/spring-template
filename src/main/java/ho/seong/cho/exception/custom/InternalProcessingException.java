@@ -14,4 +14,8 @@ public class InternalProcessingException extends AbstractBusinessException {
   public InternalProcessingException(Throwable cause) {
     super(ApiExceptionType.INTERNAL_SERVER_ERROR, cause);
   }
+
+  public InternalProcessingException(String message, Throwable cause) {
+    super(ApiExceptionType.INTERNAL_SERVER_ERROR, message, cause);
+  }
 }

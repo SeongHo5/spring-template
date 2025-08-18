@@ -1,5 +1,6 @@
 package ho.seong.cho.entity.converter;
 
+import ho.seong.cho.exception.custom.InternalProcessingException;
 import ho.seong.cho.utils.RandomGenerator;
 import io.jsonwebtoken.lang.Assert;
 import jakarta.persistence.AttributeConverter;
@@ -69,7 +70,7 @@ public class StringColumnEncryptionConverter
 
       return ENCODER.encodeToString(encryptedWithIv);
     } catch (GeneralSecurityException e) {
-      throw new RuntimeException("Failed to encrypt data.", e);
+      throw new InternalProcessingException("Failed to encrypt data.", e);
     }
   }
 
@@ -102,7 +103,7 @@ public class StringColumnEncryptionConverter
       final byte[] decryptedData = cipher.doFinal(encryptedData);
       return new String(decryptedData, DEFAULT_ENCODING);
     } catch (GeneralSecurityException e) {
-      throw new RuntimeException("Failed to decrypt data.", e);
+      throw new InternalProcessingException("Failed to decrypt data.", e);
     }
   }
 
@@ -121,7 +122,7 @@ public class StringColumnEncryptionConverter
       cipher.init(mode, secretKeySpec, gcmParameterSpec);
       return cipher;
     } catch (GeneralSecurityException e) {
-      throw new RuntimeException("Failed to initialize cipher.", e);
+      throw new InternalProcessingException("Failed to initialize cipher.", e);
     }
   }
 
