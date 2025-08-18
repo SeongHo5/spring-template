@@ -24,6 +24,8 @@ public class RedisConfig {
     Config config = new Config();
     config
         .useSingleServer()
+        .setConnectionPoolSize(64)
+        .setConnectionMinimumIdleSize(10)
         .setAddress(this.redisProperties.address().toString())
         .setPassword(this.redisProperties.password());
     return Redisson.create(config);
