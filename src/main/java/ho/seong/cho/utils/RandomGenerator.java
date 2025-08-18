@@ -1,5 +1,7 @@
 package ho.seong.cho.utils;
 
+import org.springframework.util.Assert;
+
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -20,6 +22,7 @@ public final class RandomGenerator {
    * @return 생성된 코드
    */
   public static String nextCode(final int requiredLength) {
+    Assert.isTrue(requiredLength > 0, "'requiredLength' must be greater than 0.");
     var sb = new StringBuilder(requiredLength);
     for (int i = 0; i < requiredLength; i++) {
       sb.append(CHARACTERS_FOR_CODE.charAt(RANDOM.nextInt(CHARACTERS_FOR_CODE.length())));

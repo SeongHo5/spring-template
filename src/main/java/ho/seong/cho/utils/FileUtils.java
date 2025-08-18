@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.tika.Tika;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 public final class FileUtils {
@@ -13,6 +14,7 @@ public final class FileUtils {
   private FileUtils() {}
 
   public static String resolveMimeType(@NotNull MultipartFile file) {
+    Assert.notNull(file, "'file' must not be null");
     try (InputStream input = file.getInputStream()) {
       Tika tika = new Tika();
       final var mimeType = tika.detect(input);
