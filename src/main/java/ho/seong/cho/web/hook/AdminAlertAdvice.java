@@ -1,7 +1,7 @@
 package ho.seong.cho.web.hook;
 
 import ho.seong.cho.infra.client.http.DiscordClient;
-import ho.seong.cho.utils.MySpelParser;
+import ho.seong.cho.utils.SpelEngine;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -47,7 +47,7 @@ public class AdminAlertAdvice {
   private static boolean evaluateCondition(
       String expression, ProceedingJoinPoint joinPoint, Object methodResult) {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    return MySpelParser.evaluateExpression(
+    return SpelEngine.evaluateExpression(
         expression, methodSignature.getParameterNames(), methodResult);
   }
 }

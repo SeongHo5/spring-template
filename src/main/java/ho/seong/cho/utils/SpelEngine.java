@@ -5,11 +5,14 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public final class MySpelParser {
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+public final class SpelEngine {
 
   private static final ExpressionParser PARSER = new SpelExpressionParser();
 
-  private MySpelParser() {}
+  private SpelEngine() {}
 
   /**
    * SpEL을 이용하여 동적으로 값을 가져온다.
@@ -27,7 +30,7 @@ public final class MySpelParser {
       context.setVariable(parameterNames[i], args[i]);
     }
 
-    return parser.parseExpression(expression).getValue(context);
+    return parser.parseExpression(preprocessExpression(expression)).getValue(context);
   }
 
   /**
@@ -47,5 +50,11 @@ public final class MySpelParser {
     }
 
     return PARSER.parseExpression(expression).getValue(context, Boolean.class);
+  }
+
+  private static String preprocessExpression(String keyExpression) {
+    return Arrays.stream(keyExpression.split("(?=#)"))
+        .map(token -> token.startsWith("#") ? token : "\"" + token + "\"")
+        .collect(Collectors.joining(" + "));
   }
 }

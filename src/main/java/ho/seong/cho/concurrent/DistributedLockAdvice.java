@@ -1,8 +1,6 @@
 package ho.seong.cho.concurrent;
 
-import ho.seong.cho.utils.MySpelParser;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import ho.seong.cho.utils.SpelEngine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -32,7 +30,8 @@ public class DistributedLockAdvice {
 
     log.info("Try acquiring lock for key='{}' | method='{}'", key, method);
     try {
-      if (!this.tryAcquiringLock(lock, distributedLock)) {
+      if (!lock.tryLock(
+          distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit())) {
         log.warn("Failed to acquire lock key='{}' | method='{}'", key, method);
         return false;
       }
@@ -49,23 +48,12 @@ public class DistributedLockAdvice {
   private static String generateKeyFromSpEL(
       ProceedingJoinPoint joinPoint, DistributedLock distributedLock) {
     String key =
-        MySpelParser.getDynamicValue(
-                preprocessKeyExpression(distributedLock.keyName()),
+        SpelEngine.getDynamicValue(
+                distributedLock.keyName(),
                 ((MethodSignature) joinPoint.getSignature()).getParameterNames(),
                 joinPoint.getArgs())
             .toString();
     return REDISSON_KEY_PREFIX + key;
   }
 
-  private boolean tryAcquiringLock(RLock lock, DistributedLock distributedLock)
-      throws InterruptedException {
-    return lock.tryLock(
-        distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit());
-  }
-
-  public static String preprocessKeyExpression(String keyExpression) {
-    return Arrays.stream(keyExpression.split("(?=#)"))
-        .map(token -> token.startsWith("#") ? token : "\"" + token + "\"")
-        .collect(Collectors.joining(" + "));
-  }
 }
