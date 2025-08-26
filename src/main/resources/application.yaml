@@ -32,6 +32,22 @@ security:
         client-id: GithubClientId
         client-secret: GithubClientSecret
         redirect-uri: http://localhost:8080/v1/oauth2/redirect/github
+management:
+  server:
+    port: 18080
+  endpoints:
+    web:
+      cors:
+        allowed-origins: "https://admin.domain.io"
+      exposure:
+        include:
+          - health
+          - metrics
+          - prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
 jwt:
   issuer: https://shcho.io
   secret: Key-For-JWT
@@ -49,3 +65,4 @@ service:
       ios-arn: arn:aws:sns:ap-northeast-1:123456789012:app/APNS/IOS-1
     ses:
       from: no-reply@shcho.com
+
