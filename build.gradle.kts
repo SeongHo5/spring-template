@@ -58,6 +58,8 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka:$kafkaClientVersion")
     // Bouncy Castle
     implementation("org.bouncycastle:bcprov-jdk18on:$bouncyCastleVersion")
+    // Metrics
+    implementation("io.micrometer:micrometer-registry-prometheus")
     // AWS SDK
     implementation(platform("software.amazon.awssdk:bom:2.24.0"))
     implementation("software.amazon.awssdk:s3")
