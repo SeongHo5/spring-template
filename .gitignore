@@ -50,8 +50,6 @@ out/
 
 ### Other Config Files ###
 .jpb
-/grafana
-/prometheus
 /redis
 
 ### Querydsl ###
