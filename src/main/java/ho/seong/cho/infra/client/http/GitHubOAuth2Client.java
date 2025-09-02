@@ -16,7 +16,7 @@ public interface GitHubOAuth2Client {
    * @param code 인가 코드
    * @return 발급된 접근 토큰
    */
-  @PostMapping("/login/oauth/acces_token")
+  @PostMapping("/login/oauth/access_token")
   GitHubOAuth2TokenDto issueToken(
       @RequestParam("client_id") String clientId,
       @RequestParam("client_secret") String clientSecret,
