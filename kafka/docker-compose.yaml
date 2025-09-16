@@ -1,5 +1,4 @@
-version: '3.8'
-name: 'pntbiz-kafka'
+name: 'kafka-composed'
 services:
   kafka00:
     image: bitnami/kafka:3.7.1

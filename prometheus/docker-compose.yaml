@@ -1,5 +1,4 @@
-name: mercuryx-metrics
-
+name: metrics-with-prometheus
 services:
   prometheus:
     image: prom/prometheus:v2.53.0
@@ -15,7 +14,6 @@ services:
       - --storage.tsdb.retention.time=30d
       - --web.enable-lifecycle
     restart: unless-stopped
-
   grafana:
     image: grafana/grafana:10.4.2
     container_name: grafana
@@ -31,7 +29,6 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
-
 volumes:
   prometheus_data:
   grafana_data:

@@ -61,9 +61,6 @@ docs/**/schemas.yaml
 ### Properties ###
 **/main/resources/certificates
 
-### Local Development ###
-docker-compose.yaml
-
 ### Misc ###
 .DS_Store
 ._.DS_Store

@@ -1,13 +1,11 @@
 package ho.seong.cho.oauth.support;
 
+import ho.seong.cho.exception.custom.InternalProcessingException;
 import ho.seong.cho.oauth.OAuth2Properties;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Security;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
@@ -84,9 +82,9 @@ public final class AppleClientSecretProvider {
 
       var spec = new PKCS8EncodedKeySpec(keyBytes);
       return KeyFactory.getInstance("EC").generatePrivate(spec);
-    } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
+    } catch (IOException | GeneralSecurityException ex) {
       log.error("Failed to read Apple private key / Reason: {}", ex.getMessage());
-      throw new RuntimeException(ex);
+      throw new InternalProcessingException(ex);
     }
   }
 
