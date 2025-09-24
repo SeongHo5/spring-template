@@ -30,7 +30,7 @@ public final class SpelEngine {
       context.setVariable(parameterNames[i], args[i]);
     }
 
-    return parser.parseExpression(preprocessExpression(expression)).getValue(context);
+    return parser.parseExpression(preprocess(expression)).getValue(context);
   }
 
   /**
@@ -41,7 +41,7 @@ public final class SpelEngine {
    * @param args 파라미터 값
    * @return 평가 결과
    */
-  public static Boolean evaluateExpression(
+  public static Boolean evaluate(
       String expression, String[] parameterNames, Object... args) {
     EvaluationContext context = new StandardEvaluationContext();
 
@@ -49,10 +49,10 @@ public final class SpelEngine {
       context.setVariable(parameterNames[i], args[i]);
     }
 
-    return PARSER.parseExpression(expression).getValue(context, Boolean.class);
+    return PARSER.parseExpression(preprocess(expression)).getValue(context, Boolean.class);
   }
 
-  private static String preprocessExpression(String keyExpression) {
+  private static String preprocess(String keyExpression) {
     return Arrays.stream(keyExpression.split("(?=#)"))
         .map(token -> token.startsWith("#") ? token : "\"" + token + "\"")
         .collect(Collectors.joining(" + "));
