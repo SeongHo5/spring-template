@@ -98,10 +98,23 @@ public class AdminApiAuthorizationFilter extends AbstractMySecurityFilter {
             .requestUri(request.getRequestURI())
             .httpStatus(response.getStatus())
             .isSuccessful(isSuccessful)
-            .remoteAddress(request.getRemoteAddr())
+            .remoteAddress(resolveClientIp(request))
             .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
             .timestamp(LocalDateTime.now())
             .build();
     this.eventPublisher.publishEvent(auditEvent);
+  }
+
+  private static String resolveClientIp(HttpServletRequest request) {
+    String ip = request.getHeader("X-Real-IP");
+    if (ip != null && !ip.isEmpty()) {
+      return ip;
+    }
+    ip = request.getHeader("X-Forwarded-For");
+    if (ip != null && !ip.isEmpty()) {
+      // 여러 개가 있는 경우 첫 번째 값이 실제 사용자의 IP
+      return ip.split(",")[0].trim();
+    }
+    return request.getRemoteAddr();
   }
 }
