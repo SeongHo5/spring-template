@@ -1,9 +1,8 @@
 package ho.seong.cho.utils;
 
-import org.springframework.util.Assert;
-
 import java.security.SecureRandom;
 import java.util.Random;
+import org.springframework.util.Assert;
 
 public final class RandomGenerator {
 

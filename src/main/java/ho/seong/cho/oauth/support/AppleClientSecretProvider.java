@@ -6,7 +6,6 @@ import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

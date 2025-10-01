@@ -1,12 +1,11 @@
 package ho.seong.cho.utils;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public final class SpelEngine {
 
@@ -41,8 +40,7 @@ public final class SpelEngine {
    * @param args 파라미터 값
    * @return 평가 결과
    */
-  public static Boolean evaluate(
-      String expression, String[] parameterNames, Object... args) {
+  public static Boolean evaluate(String expression, String[] parameterNames, Object... args) {
     EvaluationContext context = new StandardEvaluationContext();
 
     for (int i = 0; i < parameterNames.length; i++) {

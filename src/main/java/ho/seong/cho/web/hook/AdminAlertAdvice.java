@@ -47,7 +47,6 @@ public class AdminAlertAdvice {
   private static boolean evaluateCondition(
       String expression, ProceedingJoinPoint joinPoint, Object methodResult) {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    return SpelEngine.evaluate(
-        expression, methodSignature.getParameterNames(), methodResult);
+    return SpelEngine.evaluate(expression, methodSignature.getParameterNames(), methodResult);
   }
 }

@@ -24,7 +24,8 @@ public abstract class AbstractBusinessException extends RuntimeException {
   /** 예외 원인 */
   @Nullable private final Throwable cause;
 
-  protected AbstractBusinessException(ApiExceptionType apiExceptionType, @Nullable Throwable cause) {
+  protected AbstractBusinessException(
+      ApiExceptionType apiExceptionType, @Nullable Throwable cause) {
     super(apiExceptionType.getMessage(), cause);
     this.httpStatus = HttpStatus.resolve(apiExceptionType.getStatusCode());
     this.message = apiExceptionType.getMessage();
@@ -32,7 +33,10 @@ public abstract class AbstractBusinessException extends RuntimeException {
     this.cause = cause;
   }
 
-  protected AbstractBusinessException(ApiExceptionType apiExceptionType, @Nullable String detailMessage, @Nullable Throwable cause) {
+  protected AbstractBusinessException(
+      ApiExceptionType apiExceptionType,
+      @Nullable String detailMessage,
+      @Nullable Throwable cause) {
     super(detailMessage, cause);
     this.httpStatus = HttpStatus.resolve(apiExceptionType.getStatusCode());
     this.message = detailMessage;
@@ -43,5 +47,4 @@ public abstract class AbstractBusinessException extends RuntimeException {
   protected AbstractBusinessException(ApiExceptionType apiExceptionType) {
     this(apiExceptionType, null);
   }
-
 }
