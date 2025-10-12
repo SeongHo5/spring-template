@@ -1,5 +1,6 @@
 package ho.seong.cho.security.web;
 
+import ho.seong.cho.utils.ClassUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -12,12 +13,25 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
 
   @Override
   public void handle(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      AccessDeniedException accessDeniedException)
+      HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
       throws IOException {
-    if (log.isDebugEnabled()) {
-      log.debug("Access Denied: {}", accessDeniedException.getMessage());
+    if (log.isWarnEnabled()) {
+      Throwable cause = ex.getCause();
+      if (cause != null) {
+        log.warn(
+            "FORBIDDEN uri='{}'; {}: {} Caused by: {}: {}",
+            request.getRequestURI(),
+            ClassUtils.getSimpleName(ex),
+            ex.getMessage(),
+            ClassUtils.getSimpleName(cause),
+            cause.getMessage());
+      } else {
+        log.warn(
+            "FORBIDDEN uri='{}'; {}: {}",
+            request.getRequestURI(),
+            ClassUtils.getSimpleName(ex),
+            ex.getMessage());
+      }
     }
     response.sendError(HttpServletResponse.SC_FORBIDDEN);
   }
