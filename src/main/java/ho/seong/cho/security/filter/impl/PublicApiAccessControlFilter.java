@@ -62,7 +62,7 @@ public class PublicApiAccessControlFilter extends AbstractMySecurityFilter {
       case OPTIONAL -> requestedHeader.isEmpty() || this.publicApiKey.equals(requestedHeader.get());
       case NONE ->
           throw new IllegalStateException(
-              "If access level is PROTECTED, key validation must be REQUIRED or OPTIONAL");
+              "If access level is PROTECTED, key validation must be REQUIRED or OPTIONAL.");
     };
   }
 

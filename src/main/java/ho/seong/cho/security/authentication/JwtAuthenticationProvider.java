@@ -3,10 +3,10 @@ package ho.seong.cho.security.authentication;
 import ho.seong.cho.jwt.JwtProvider;
 import ho.seong.cho.security.userdetails.MyUserDetails;
 import ho.seong.cho.users.UserService;
+import ho.seong.cho.utils.ClassUtils;
 import io.jsonwebtoken.Claims;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -29,7 +29,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     if (!(authentication instanceof JwtAuthenticationToken)) {
-      throw new AuthenticationCredentialsNotFoundException("JwtAuthenticationToken is required");
+      throw new BadCredentialsException(
+          "Expected JwtAuthenticationToken, but received "
+              + ClassUtils.getSimpleName(authentication));
     }
     String token = authentication.getCredentials().toString();
     long userId = Long.parseLong(this.validateAndGetClaims(token).getSubject());
@@ -38,14 +40,14 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         .findById(userId)
         // .filter(User::isEnabled)
         .map(user -> JwtAuthenticationToken.authenticated(MyUserDetails.from(user)))
-        .orElseThrow(() -> new UsernameNotFoundException("User not found or disabled"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found or disabled."));
   }
 
   private Claims validateAndGetClaims(String token) {
     return this.jwtProvider
         .parse(token)
         .filter(this::isNotExpired)
-        .orElseThrow(() -> new BadCredentialsException("Token is expired or invalid"));
+        .orElseThrow(() -> new BadCredentialsException("Token is expired or invalid."));
   }
 
   private boolean isNotExpired(Claims claims) {

@@ -50,7 +50,7 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
    * @throws IllegalArgumentException 인증된 사용자 정보가 {@code null}인 경우
    */
   public static JwtAuthenticationToken authenticated(@NotNull MyUserDetails userDetails) {
-    Assert.notNull(userDetails, "Authenticated user must not be null");
+    Assert.notNull(userDetails, "'userDetails' must not be null.");
     return new JwtAuthenticationToken(userDetails);
   }
 

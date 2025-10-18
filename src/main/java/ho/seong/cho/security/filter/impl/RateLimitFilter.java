@@ -33,8 +33,8 @@ public class RateLimitFilter extends AbstractMySecurityFilter {
     }
 
     RateLimit rateLimit = optionalRateLimit.get();
-    Assert.isTrue(rateLimit.maxRequests() > 0, "maxRequests must be greater than 0");
-    Assert.isTrue(rateLimit.duration() > 0, "duration must be greater than 0");
+    Assert.isTrue(rateLimit.maxRequests() > 0, "'maxRequests' must be greater than 0.");
+    Assert.isTrue(rateLimit.duration() > 0, "'duration' must be greater than 0.");
 
     String key = this.generateRateLimitKey(request);
 
@@ -57,7 +57,7 @@ public class RateLimitFilter extends AbstractMySecurityFilter {
       case BLOCK -> isExceeded;
       case ONLY_LOG -> {
         if (isExceeded) {
-          logger.warn("Rate limit exceeded for action: ONLY_LOG (key).");
+          this.logger.warn("Rate limit exceeded for action: ONLY_LOG (key).");
         }
         yield false;
       }
