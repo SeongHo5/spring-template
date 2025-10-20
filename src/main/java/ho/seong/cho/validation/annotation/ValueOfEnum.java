@@ -28,6 +28,8 @@ public @interface ValueOfEnum {
    */
   boolean required() default true;
 
+  boolean ignoreCase() default false;
+
   String message() default "{ho.seong.cho.validator.constraints.ValueOfEnum.message}";
 
   Class<?>[] groups() default {};
