@@ -27,12 +27,13 @@ public abstract class CustomConstraintValidator<A extends Annotation, T>
    * @param message 사용자 정의 메세지
    * @param fieldName 필드 이름
    */
-  protected void setCustomViolationMessage(
+  protected void addCustomViolationMessage(
       ConstraintValidatorContext context, final String message, final String fieldName) {
     context.disableDefaultConstraintViolation();
-    context
-        .buildConstraintViolationWithTemplate(message)
-        .addPropertyNode(fieldName)
-        .addConstraintViolation();
+    final var violationBuilder = context.buildConstraintViolationWithTemplate(message);
+    if (fieldName != null) {
+      violationBuilder.addPropertyNode(fieldName);
+    }
+    violationBuilder.addConstraintViolation();
   }
 }

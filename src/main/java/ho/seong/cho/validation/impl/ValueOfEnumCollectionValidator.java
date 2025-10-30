@@ -3,7 +3,7 @@ package ho.seong.cho.validation.impl;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Collection;
 
-public class ValueOfEnumCollectionValidator
+public final class ValueOfEnumCollectionValidator
     extends AbstractValueOfEnumValidator<Collection<String>> {
 
   @Override
@@ -11,6 +11,10 @@ public class ValueOfEnumCollectionValidator
     if (values == null || values.isEmpty()) {
       return false;
     }
-    return this.acceptedValues.containsAll(values);
+    if (!this.allowed.containsAll(values)) {
+      super.addAllowedValuesViolation(context);
+      return false;
+    }
+    return true;
   }
 }

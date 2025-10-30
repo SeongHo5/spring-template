@@ -23,7 +23,7 @@ public class NicknameValidator extends CustomConstraintValidator<Nickname, Strin
     }
 
     if (FORBIDDEN_NICKNAME_PATTERN.matcher(value).find()) {
-      this.setCustomViolationMessage(
+      this.addCustomViolationMessage(
           context, "ho.seong.cho.validator.constraints.Nickname.invalid.forbidden", "nickname");
       return false;
     }
