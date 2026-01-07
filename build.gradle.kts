@@ -79,6 +79,7 @@ dependencies {
     // HTML
     implementation("com.j2html:j2html:$j2htmlVersion")
     implementation("org.jsoup:jsoup:$jsoupVersion")
+    runtimeOnly("com.mysql:mysql-connector-j")
 }
 
 spotless {

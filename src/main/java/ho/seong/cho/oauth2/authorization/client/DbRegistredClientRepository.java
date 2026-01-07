@@ -15,14 +15,14 @@ public class DbRegistredClientRepository implements RegisteredClientRepository {
   @Override
   public void save(RegisteredClient registeredClient) {
     // TODO: id 기준으로 기등록 여부에 따라 save / update
-    this.repository.save(RegisteredClientMapper.toEntity(registeredClient));
+    this.repository.save(Oauth2ClientInfoMapper.toEntity(registeredClient));
   }
 
   @Nullable @Override
   public RegisteredClient findById(String id) {
     return this.repository
         .findById(id)
-        .map(RegisteredClientMapper::toRegisteredClient)
+        .map(Oauth2ClientInfoMapper::toRegisteredClient)
         .orElse(null);
   }
 
@@ -30,7 +30,7 @@ public class DbRegistredClientRepository implements RegisteredClientRepository {
   public RegisteredClient findByClientId(String clientId) {
     return this.repository
         .findByClientId(clientId)
-        .map(RegisteredClientMapper::toRegisteredClient)
+        .map(Oauth2ClientInfoMapper::toRegisteredClient)
         .orElse(null);
   }
 }

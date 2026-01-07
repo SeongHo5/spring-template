@@ -3,15 +3,16 @@ package ho.seong.cho.oauth2.authorization.client;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
-final class RegisteredClientMapper {
+public final class Oauth2ClientInfoMapper {
 
-  private RegisteredClientMapper() {}
+  private Oauth2ClientInfoMapper() {}
 
   // -------------------------
   // Entity -> RegisteredClient
@@ -39,23 +40,50 @@ final class RegisteredClientMapper {
     }
 
     // client auth methods
-    Set<String> cam = defaultEmpty(entity.getClientAuthenticationMethods());
+    Set<String> cam = defaultIfEmpty(entity.getClientAuthenticationMethods());
     cam.forEach(v -> builder.clientAuthenticationMethod(new ClientAuthenticationMethod(v)));
     // grant types
-    Set<String> grants = defaultEmpty(entity.getAuthorizationGrantTypes());
+    Set<String> grants = defaultIfEmpty(entity.getAuthorizationGrantTypes());
     grants.forEach(v -> builder.authorizationGrantType(new AuthorizationGrantType(v)));
     // redirect uris
-    defaultEmpty(entity.getRedirectUris()).forEach(builder::redirectUri);
+    defaultIfEmpty(entity.getRedirectUris()).forEach(builder::redirectUri);
     // post logout redirect uris
-    defaultEmpty(entity.getPostLogoutRedirectUris()).forEach(builder::postLogoutRedirectUri);
+    defaultIfEmpty(entity.getPostLogoutRedirectUris()).forEach(builder::postLogoutRedirectUri);
     // scopes
-    defaultEmpty(entity.getScopes()).forEach(builder::scope);
+    defaultIfEmpty(entity.getScopes()).forEach(builder::scope);
     // settings (Map -> settings)
-    Map<String, Object> clientSettingsMap = defaultEmptyMap(entity.getClientSettings());
-    Map<String, Object> tokenSettingsMap = defaultEmptyMap(entity.getTokenSettings());
+    Map<String, Object> clientSettingsMap = defaultIfEmptyMap(entity.getClientSettings());
+    Map<String, Object> tokenSettingsMap = defaultIfEmptyMap(entity.getTokenSettings());
     builder.clientSettings(ClientSettings.withSettings(clientSettingsMap).build());
     builder.tokenSettings(TokenSettings.withSettings(tokenSettingsMap).build());
 
+    return builder.build();
+  }
+
+  // -------------------------
+  // Entity -> ClientRegistration
+  // -------------------------
+  public static ClientRegistration toClientRegistration(Oauth2ClientInfo entity) {
+    Objects.requireNonNull(entity, "entity");
+
+    final var builder =
+        ClientRegistration.withRegistrationId(entity.getId())
+            .clientId(entity.getClientId())
+            .clientName(entity.getClientName());
+
+    if (entity.getClientSecret() != null) {
+      builder.clientSecret(entity.getClientSecret());
+    }
+    // client auth methods
+    Set<String> cam = defaultIfEmpty(entity.getClientAuthenticationMethods());
+    cam.forEach(v -> builder.clientAuthenticationMethod(new ClientAuthenticationMethod(v)));
+    // grant types
+    Set<String> grants = defaultIfEmpty(entity.getAuthorizationGrantTypes());
+    grants.forEach(v -> builder.authorizationGrantType(new AuthorizationGrantType(v)));
+    // redirect uris
+    defaultIfEmpty(entity.getRedirectUris()).forEach(builder::redirectUri);
+    // scopes
+    defaultIfEmpty(entity.getScopes()).forEach(builder::scope);
     return builder.build();
   }
 
@@ -97,11 +125,11 @@ final class RegisteredClientMapper {
         .build();
   }
 
-  private static <T> Set<T> defaultEmpty(Set<T> v) {
+  private static <T> Set<T> defaultIfEmpty(Set<T> v) {
     return v == null ? Collections.emptySet() : v;
   }
 
-  private static Map<String, Object> defaultEmptyMap(Map<String, Object> v) {
+  private static Map<String, Object> defaultIfEmptyMap(Map<String, Object> v) {
     return v == null ? Collections.emptyMap() : v;
   }
 }
