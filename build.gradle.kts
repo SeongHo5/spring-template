@@ -52,6 +52,9 @@ dependencies {
     implementation ("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation ("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation ("org.springframework.security:spring-security-oauth2-jose")
+    // For WebClient
+    implementation ("org.springframework:spring-webflux")
+    implementation ("io.projectreactor.netty:reactor-netty-http")
     // Lombok
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

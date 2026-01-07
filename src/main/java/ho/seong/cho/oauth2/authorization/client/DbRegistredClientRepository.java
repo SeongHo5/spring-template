@@ -14,6 +14,7 @@ public class DbRegistredClientRepository implements RegisteredClientRepository {
 
   @Override
   public void save(RegisteredClient registeredClient) {
+    // TODO: id 기준으로 기등록 여부에 따라 save / update
     this.repository.save(RegisteredClientMapper.toEntity(registeredClient));
   }
 

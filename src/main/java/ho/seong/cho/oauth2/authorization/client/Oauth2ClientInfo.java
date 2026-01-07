@@ -3,18 +3,17 @@ package ho.seong.cho.oauth2.authorization.client;
 import ho.seong.cho.entity.converter.JsonMapConverter;
 import ho.seong.cho.entity.converter.StringSetToCsvConverter;
 import jakarta.persistence.*;
-import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import lombok.*;
 
 @Entity
-@Table(name = "tb_oauth2_registered_client")
+@Table(name = "tb_oauth2_client_info")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Oauth2RegisteredClient {
+public class Oauth2ClientInfo {
 
   @Id
   @Column(length = 100)
@@ -24,13 +23,13 @@ public class Oauth2RegisteredClient {
   private String clientId;
 
   @Column(name = "client_id_issued_at", nullable = false)
-  private Instant clientIdIssuedAt;
+  private Long clientIdIssuedAt;
 
   @Column(name = "client_secret", length = 200)
   private String clientSecret;
 
   @Column(name = "client_secret_expires_at")
-  private Instant clientSecretExpiresAt;
+  private Long clientSecretExpiresAt;
 
   @Column(name = "client_name", length = 200, nullable = false)
   private String clientName;

@@ -16,67 +16,70 @@ final class RegisteredClientMapper {
   // -------------------------
   // Entity -> RegisteredClient
   // -------------------------
-  public static RegisteredClient toRegisteredClient(Oauth2RegisteredClient e) {
-    Objects.requireNonNull(e, "entity");
+  public static RegisteredClient toRegisteredClient(Oauth2ClientInfo entity) {
+    Objects.requireNonNull(entity, "entity");
 
-    RegisteredClient.Builder b =
-        RegisteredClient.withId(requireNonBlank(e.getId(), "id"))
-            .clientId(requireNonBlank(e.getClientId(), "clientId"))
-            .clientName(requireNonBlank(e.getClientName(), "clientName"));
+    final var builder =
+        RegisteredClient.withId(entity.getId())
+            .clientId(entity.getClientId())
+            .clientName(entity.getClientName());
 
-    Instant issuedAt = e.getClientIdIssuedAt();
+    Long issuedAt = entity.getClientIdIssuedAt();
     if (issuedAt != null) {
-      b.clientIdIssuedAt(issuedAt);
+      builder.clientIdIssuedAt(Instant.ofEpochSecond(issuedAt));
     }
 
-    if (e.getClientSecret() != null) {
-      b.clientSecret(e.getClientSecret());
+    if (entity.getClientSecret() != null) {
+      builder.clientSecret(entity.getClientSecret());
     }
 
-    Instant secretExpiresAt = e.getClientSecretExpiresAt();
+    Long secretExpiresAt = entity.getClientSecretExpiresAt();
     if (secretExpiresAt != null) {
-      b.clientSecretExpiresAt(secretExpiresAt);
+      builder.clientSecretExpiresAt(Instant.ofEpochSecond(secretExpiresAt));
     }
 
     // client auth methods
-    Set<String> cam = defaultEmpty(e.getClientAuthenticationMethods());
-    cam.forEach(v -> b.clientAuthenticationMethod(new ClientAuthenticationMethod(v)));
-
+    Set<String> cam = defaultEmpty(entity.getClientAuthenticationMethods());
+    cam.forEach(v -> builder.clientAuthenticationMethod(new ClientAuthenticationMethod(v)));
     // grant types
-    Set<String> grants = defaultEmpty(e.getAuthorizationGrantTypes());
-    grants.forEach(v -> b.authorizationGrantType(new AuthorizationGrantType(v)));
-
+    Set<String> grants = defaultEmpty(entity.getAuthorizationGrantTypes());
+    grants.forEach(v -> builder.authorizationGrantType(new AuthorizationGrantType(v)));
     // redirect uris
-    defaultEmpty(e.getRedirectUris()).forEach(b::redirectUri);
-
+    defaultEmpty(entity.getRedirectUris()).forEach(builder::redirectUri);
     // post logout redirect uris
-    defaultEmpty(e.getPostLogoutRedirectUris()).forEach(b::postLogoutRedirectUri);
-
+    defaultEmpty(entity.getPostLogoutRedirectUris()).forEach(builder::postLogoutRedirectUri);
     // scopes
-    defaultEmpty(e.getScopes()).forEach(b::scope);
-
+    defaultEmpty(entity.getScopes()).forEach(builder::scope);
     // settings (Map -> settings)
-    Map<String, Object> clientSettingsMap = defaultEmptyMap(e.getClientSettings());
-    Map<String, Object> tokenSettingsMap = defaultEmptyMap(e.getTokenSettings());
+    Map<String, Object> clientSettingsMap = defaultEmptyMap(entity.getClientSettings());
+    Map<String, Object> tokenSettingsMap = defaultEmptyMap(entity.getTokenSettings());
+    builder.clientSettings(ClientSettings.withSettings(clientSettingsMap).build());
+    builder.tokenSettings(TokenSettings.withSettings(tokenSettingsMap).build());
 
-    b.clientSettings(ClientSettings.withSettings(clientSettingsMap).build());
-    b.tokenSettings(TokenSettings.withSettings(tokenSettingsMap).build());
-
-    return b.build();
+    return builder.build();
   }
 
   // -------------------------
   // RegisteredClient -> Entity
   // -------------------------
-  public static Oauth2RegisteredClient toEntity(RegisteredClient rc) {
+  public static Oauth2ClientInfo toEntity(RegisteredClient rc) {
     Objects.requireNonNull(rc, "registeredClient");
 
-    return Oauth2RegisteredClient.builder()
-        .id(rc.getId())
-        .clientId(rc.getClientId())
-        .clientIdIssuedAt(rc.getClientIdIssuedAt())
-        .clientSecret(rc.getClientSecret())
-        .clientSecretExpiresAt(rc.getClientSecretExpiresAt())
+    var builder = Oauth2ClientInfo.builder().id(rc.getId()).clientId(rc.getClientId());
+
+    Instant issuedAt = rc.getClientIdIssuedAt();
+    if (issuedAt != null) {
+      builder.clientIdIssuedAt(issuedAt.getEpochSecond());
+    }
+    if (rc.getClientSecret() != null) {
+      builder.clientSecret(rc.getClientSecret());
+    }
+    Instant secretExpiresAt = rc.getClientSecretExpiresAt();
+    if (secretExpiresAt != null) {
+      builder.clientSecretExpiresAt(secretExpiresAt.getEpochSecond());
+    }
+
+    return builder
         .clientName(rc.getClientName())
         .clientAuthenticationMethods(
             rc.getClientAuthenticationMethods().stream()
@@ -100,16 +103,5 @@ final class RegisteredClientMapper {
 
   private static Map<String, Object> defaultEmptyMap(Map<String, Object> v) {
     return v == null ? Collections.emptyMap() : v;
-  }
-
-  private static Map<String, Object> copySettings(Map<String, Object> source) {
-    return source == null ? new LinkedHashMap<>() : new LinkedHashMap<>(source);
-  }
-
-  private static String requireNonBlank(String v, String field) {
-    if (v == null || v.isBlank()) {
-      throw new IllegalArgumentException(field + " is blank");
-    }
-    return v;
   }
 }
