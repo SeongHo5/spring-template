@@ -431,7 +431,6 @@ final class InterfaceAnnotationMover {
     try {
       return declaration.resolve().getQualifiedName();
     } catch (Exception e) {
-      error("Failed to resolve FQN for type: " + declaration.getNameAsString(), e);
       return null;
     }
   }
@@ -441,7 +440,6 @@ final class InterfaceAnnotationMover {
       ResolvedReferenceType rrt = type.resolve().asReferenceType();
       return rrt.getQualifiedName();
     } catch (Exception e) {
-      error("Failed to resolve FQN for type: " + type.getNameAsString(), e);
       return null;
     }
   }
