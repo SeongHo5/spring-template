@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class DbRegistredClientRepository implements RegisteredClientRepository {
+public class DbRegisteredClientRepository implements RegisteredClientRepository {
 
   private final Oauth2ClientInfoRepository repository;
 
