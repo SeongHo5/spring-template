@@ -6,7 +6,6 @@ import io.jsonwebtoken.lang.Assert;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
@@ -29,8 +28,6 @@ public class StringColumnEncryptionConverter
 
   /** 초기화 벡터의 길이: 12 바이트로 고정 */
   private static final int INITIAL_VECTOR_LENGTH = 12;
-
-  private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
   private static final Base64.Encoder ENCODER = Base64.getEncoder();
   private static final Base64.Decoder DECODER = Base64.getDecoder();
@@ -61,7 +58,7 @@ public class StringColumnEncryptionConverter
       final byte[] initialVector = RandomGenerator.nextBytes(INITIAL_VECTOR_LENGTH);
 
       final var cipher = initCipher(Cipher.ENCRYPT_MODE, this.secretKeySpec, initialVector);
-      final byte[] encryptedData = cipher.doFinal(attribute.getBytes(DEFAULT_ENCODING));
+      final byte[] encryptedData = cipher.doFinal(attribute.getBytes(StandardCharsets.UTF_8));
       final byte[] encryptedWithIv =
           ByteBuffer.allocate(initialVector.length + encryptedData.length)
               .put(initialVector)
@@ -101,7 +98,7 @@ public class StringColumnEncryptionConverter
 
       final var cipher = initCipher(Cipher.DECRYPT_MODE, this.secretKeySpec, initialVector);
       final byte[] decryptedData = cipher.doFinal(encryptedData);
-      return new String(decryptedData, DEFAULT_ENCODING);
+      return new String(decryptedData, StandardCharsets.UTF_8);
     } catch (GeneralSecurityException e) {
       throw new InternalProcessingException("Failed to decrypt data.", e);
     }
@@ -133,7 +130,7 @@ public class StringColumnEncryptionConverter
    * @return AES 알고리즘을 위한 SecretKeySpec
    */
   private static SecretKeySpec generateAESKey(final String key) {
-    byte[] keyBytes = key.getBytes(DEFAULT_ENCODING);
+    byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
     final byte[] finalKey = new byte[AES_KEY_LENGTH];
 
     for (int i = 0; i < finalKey.length; i++) {
