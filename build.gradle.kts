@@ -80,6 +80,7 @@ dependencies {
     implementation("com.j2html:j2html:$j2htmlVersion")
     implementation("org.jsoup:jsoup:$jsoupVersion")
     runtimeOnly("com.mysql:mysql-connector-j")
+    implementation("org.dom4j:dom4j:2.1.4")
     implementation("com.github.javaparser:javaparser-core:3.28.0")
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.28.0")
 }
