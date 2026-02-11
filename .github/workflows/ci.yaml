@@ -14,8 +14,7 @@ jobs:
   ci:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    permissions: read-all
 
     steps:
 
