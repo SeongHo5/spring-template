@@ -13,8 +13,7 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
 
   @Override
   public void handle(
-      HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
-      throws IOException {
+      HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex) {
     if (log.isWarnEnabled()) {
       Throwable cause = ex.getCause();
       if (cause != null) {
@@ -33,6 +32,6 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
             ex.getMessage());
       }
     }
-    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
   }
 }
