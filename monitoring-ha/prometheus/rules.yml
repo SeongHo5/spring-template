@@ -1,0 +1,53 @@
+groups:
+  # 호스트 리소스(CPU/메모리/디스크) 관련 기본 알람 룰
+  - name: host-resource-alerts
+    rules:
+      # 타겟이 내려가서 scrape 자체가 실패하는 경우
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance down ({{ $labels.instance }})"
+          description: "Target {{ $labels.job }}/{{ $labels.instance }} is unreachable."
+
+      # 5분 평균 CPU 사용률이 85% 초과
+      - alert: HostHighCpuUsage
+        expr: (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage ({{ $labels.instance }})"
+          description: "CPU usage is above 85% for 10 minutes."
+
+      # 메모리 사용률이 90% 초과
+      - alert: HostHighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage ({{ $labels.instance }})"
+          description: "Memory usage is above 90% for 10 minutes."
+
+      # 디스크 사용률이 85% 초과 (tmpfs/overlay, /run 계열 제외)
+      - alert: HostDiskUsageHigh
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay",mountpoint!~"/run.*"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay",mountpoint!~"/run.*"})) * 100 > 85
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "Disk usage is above 85% for 15 minutes on {{ $labels.mountpoint }}."
+
+      # 최근 6시간 추세 기준 24시간 이내 디스크 소진 예측
+      - alert: HostDiskWillFillSoon
+        expr: predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay",mountpoint!~"/run.*"}[6h], 24 * 3600) < 0
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk will fill in 24h ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "Predicted free space is less than 0 bytes in the next 24h."
