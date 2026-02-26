@@ -1,0 +1,82 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: monitoring-prometheus
+    restart: unless-stopped
+    command:
+      # Prometheus 메인 설정 파일 경로
+      - --config.file=/etc/prometheus/prometheus.yml
+      # TSDB(시계열 DB) 저장 경로
+      - --storage.tsdb.path=/prometheus
+      # 메트릭 보관 기간 (필요 시 7d, 90d 등으로 조정)
+      - --storage.tsdb.retention.time=30d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - node-exporter
+      - alertmanager
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: monitoring-alertmanager
+    restart: unless-stopped
+    command:
+      # Alertmanager 설정 파일
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      # Alertmanager 상태 데이터 저장 경로
+      - --storage.path=/alertmanager
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./alertmanager/templates:/etc/alertmanager/templates:ro
+      - alertmanager-data:/alertmanager
+    ports:
+      - "9093:9093"
+
+  # Linux 호스트 기준 컨테이너 방식 예시.
+  # 운영 환경에서 더 정확한 호스트 메트릭이 필요하면 node_exporter를 host에 직접 설치하세요.
+  node-exporter:
+    # 호스트 CPU/메모리/디스크/파일시스템 메트릭 노출
+    image: quay.io/prometheus/node-exporter:v1.8.1
+    container_name: monitoring-node-exporter
+    restart: unless-stopped
+    command:
+      # 호스트 루트 파일시스템을 /host 경로로 인식
+      - --path.rootfs=/host
+      # systemd 관련 메트릭 수집
+      - --collector.systemd
+      # 프로세스 관련 메트릭 수집
+      - --collector.processes
+    # PID 네임스페이스를 호스트와 공유(프로세스 메트릭 정확도 향상)
+    pid: host
+    volumes:
+      # 호스트 루트를 읽기 전용 마운트
+      - /:/host:ro,rslave
+    ports:
+      - "9100:9100"
+
+  # 추후 UI 필요할 때만 활성화:
+  # docker compose --profile ui up -d
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: monitoring-grafana
+    restart: unless-stopped
+    profiles:
+      - ui
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: AdminPassword!
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:
+  alertmanager-data:
+  grafana-data:

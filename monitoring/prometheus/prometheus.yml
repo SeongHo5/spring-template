@@ -1,0 +1,29 @@
+global:
+  # 각 타겟을 몇 초마다 수집할지 설정
+  scrape_interval: 15s
+  # 알람 룰 평가 주기
+  evaluation_interval: 30s
+
+rule_files:
+  # 알람/레코딩 룰 파일 경로
+  - /etc/prometheus/rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            # docker compose 서비스명 기반 DNS
+            - alertmanager:9093
+
+scrape_configs:
+  # Prometheus 자기 자신 메트릭 수집
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - prometheus:9090
+
+  # 노드(호스트) 리소스 메트릭 수집
+  - job_name: node-exporter
+    static_configs:
+      - targets:
+          - node-exporter:9100
