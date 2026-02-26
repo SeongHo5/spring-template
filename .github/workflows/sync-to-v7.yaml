@@ -1,0 +1,112 @@
+name: Sync v5 to v7 repo (legacy fork)
+
+on:
+  push:
+    branches:
+      - "main"
+
+concurrency:
+  group: sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    env:
+      TARGET_REPO: SeongHo5/new-repo
+      TARGET_BASE_BRANCH: develop
+      SOURCE_PATHS: "api"
+      TARGET_ROOT: "apps/api/legacy"
+
+    steps:
+      - name: Checkout source (this repo)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          path: target
+          token: ${{ secrets.TARGET_REPO_PAT }}
+          fetch-depth: 0
+
+      - name: Prepare branch name
+        id: vars
+        run: |
+          SRC_BRANCH="${GITHUB_REF_NAME}"
+          SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-8)"
+          SAFE_BRANCH="$(echo "${SRC_BRANCH}" | sed 's/[^a-zA-Z0-9._-]/-/g')"
+          echo "src_branch=${SRC_BRANCH}" >> $GITHUB_OUTPUT
+          echo "sync_branch=sync/v5/${SAFE_BRANCH}/${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Sync files into target working tree
+        run: |
+          set -euo pipefail
+
+          cd target
+          git checkout "${{ env.TARGET_BASE_BRANCH }}"
+          git pull --ff-only
+
+          git checkout -B "${{ steps.vars.outputs.sync_branch }}"
+
+          cd ..
+
+          for p in $SOURCE_PATHS; do
+            echo "Sync path: $p"
+            mkdir -p "target/${TARGET_ROOT}/${p}"
+            rsync -a --delete \
+              --exclude ".git/" \
+              --exclude "**/build/" \
+              --exclude "**/.gradle/" \
+              --exclude "**/node_modules/" \
+              "${p}/" "target/${TARGET_ROOT}/${p}/"
+          done
+
+      - name: Commit & push
+        run: |
+          set -euo pipefail
+          cd target
+
+          git status --porcelain
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes. Skip."
+            exit 0
+          fi
+
+          git config user.name "sync-bot"
+          git config user.email "sync-bot@users.noreply.github.com"
+
+          git add -A
+          git commit -m "chore(sync): v5->v7 legacy sync from ${{ github.repository }}@${{ steps.vars.outputs.short_sha }} (${{
+            steps.vars.outputs.src_branch }})"
+          git push -u origin "${{ steps.vars.outputs.sync_branch }}" --force-with-lease
+
+      - name: Create or update PR
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.TARGET_REPO_PAT }}
+        run: |
+          set -euo pipefail
+          cd target
+
+          existing="$(gh pr list --repo "${{ env.TARGET_REPO }}" \
+            --head "${{ steps.vars.outputs.sync_branch }}" \
+            --base "${{ env.TARGET_BASE_BRANCH }}" \
+            --json number --jq '.[0].number // empty')"
+
+          if [ -n "$existing" ]; then
+            echo "PR already exists: #$existing"
+            exit 0
+          fi
+
+          gh pr create --repo "${{ env.TARGET_REPO }}" \
+            --base "${{ env.TARGET_BASE_BRANCH }}" \
+            --head "${{ steps.vars.outputs.sync_branch }}" \
+            --title "Sync legacy v5 API (${{
+              steps.vars.outputs.src_branch }}) -> v7" \
+            --body "Source: ${{ github.repository }}@${{ github.sha }}"
