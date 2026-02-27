@@ -13,10 +13,25 @@ set -Eeuo pipefail
 SMTP_HOST="smtp.mailplug.co.kr"
 SMTP_PORT="465"
 
+# 모니터링 기본 이미지 버전(요청하신 compose 기준)
+DEFAULT_PROMETHEUS_TAG="v3.10.0"
+DEFAULT_ALERTMANAGER_TAG="v0.31.0"
+DEFAULT_NODE_EXPORTER_TAG="v0.10.2"
+DEFAULT_GRAFANA_TAG="12.3.4"
+
 print_info()  { echo "[INFO] $1"; }
 print_warn()  { echo "[WARN] $1"; }
 print_error() { echo "[ERROR] $1"; }
 print_ok()    { echo "[DONE] $1"; }
+
+run_as_root() {
+  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    "$@"
+  else
+    command -v sudo >/dev/null 2>&1 || { print_error "sudo 명령어를 찾지 못했습니다. root로 실행하거나 sudo를 설치해주세요."; return 1; }
+    sudo "$@"
+  fi
+}
 
 ask() {
   local prompt="$1"
@@ -47,7 +62,7 @@ ask_yn() {
 }
 
 need_cmd() {
-  command -v "$1" >/dev/null 2>&1 || { print_error "필수 명령어가 존재하지 않습니다: $1"; return 1; }
+  command -v "$1" >/dev/null 2>&1 || { print_error "필수 명령어가 없습니다: $1"; return 1; }
 }
 
 ########################################
@@ -81,12 +96,41 @@ detect_os() {
   print_info "PKG_FAMILY: ${PKG_FAMILY}"
 }
 
+show_env_block() {
+  echo "  - OS            : ${OS_ID} ${OS_VERSION}"
+  echo "  - ARCH          : ${ARCH}"
+  echo "  - PKG_FAMILY    : ${PKG_FAMILY}"
+}
+
+confirm_offline_bundle_env() {
+  echo ""
+  echo "****************************************************************"
+  echo "중요 안내"
+  echo ""
+  echo "오프라인 번들은 '설치 대상 서버'와 동일한 OS/버전/아키텍처 환경에서 준비해야 합니다."
+  echo "환경이 다르면 의존성 또는 glibc 차이로 설치가 실패할 수 있습니다."
+  echo "****************************************************************"
+  echo ""
+  echo "현재 번들을 준비 중인 서버 환경은 다음과 같습니다."
+  show_env_block
+  echo ""
+
+  local ok
+  ok="$(ask_yn "설치 대상 서버도 위 환경과 완전히 동일합니까? (Y 입력 시에만 진행)" "N")"
+  if [[ "$ok" != "Y" ]]; then
+    print_warn "번들 준비를 중단합니다."
+    return 1
+  fi
+
+  return 0
+}
+
 ########################################
 # SMTP 아웃바운드 체크
 ########################################
 
 check_smtp_outbound() {
-  print_info "SMTP 아웃바운드 연결 상태를 확인합니다. (${SMTP_HOST}:${SMTP_PORT})"
+  print_info "SMTP 아웃바운드 연결을 확인합니다. (${SMTP_HOST}:${SMTP_PORT})"
   print_info "방화벽/보안장비에서 아웃바운드가 허용되어 있어야 합니다."
 
   if timeout 5 bash -c ">/dev/tcp/${SMTP_HOST}/${SMTP_PORT}" 2>/dev/null; then
@@ -111,11 +155,11 @@ is_docker_installed() {
 ########################################
 
 ensure_docker_repo_rhel() {
-  # dnf config-manager 필요
-  print_info "dnf-plugins-core 설치를 진행합니다."
-  sudo dnf -y install dnf-plugins-core
+  need_cmd dnf
 
-  # repo 추가 (중복 추가 방지)
+  print_info "dnf-plugins-core 설치를 진행합니다."
+  run_as_root dnf -y install dnf-plugins-core
+
   local repo_file="/etc/yum.repos.d/docker-ce.repo"
   if [[ -f "$repo_file" ]]; then
     print_info "Docker 공식 저장소가 이미 추가되어 있습니다."
@@ -123,29 +167,25 @@ ensure_docker_repo_rhel() {
   fi
 
   print_info "Docker 공식 저장소를 추가합니다."
-  sudo dnf config-manager --add-repo \
+  run_as_root dnf config-manager --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 }
 
 install_docker_rhel_online() {
-  # 먼저 체크
   if is_docker_installed; then
     print_ok "Docker가 이미 설치되어 있습니다."
     return 0
   fi
 
   print_info "Docker가 설치되어 있지 않습니다. 온라인 설치를 진행합니다."
-
-  need_cmd dnf
-
   ensure_docker_repo_rhel
 
   print_info "Docker 패키지 설치를 진행합니다."
-  sudo dnf -y install docker-ce docker-ce-cli containerd.io \
+  run_as_root dnf -y install docker-ce docker-ce-cli containerd.io \
     docker-buildx-plugin docker-compose-plugin
 
   print_info "Docker 서비스를 활성화 및 시작합니다."
-  sudo systemctl enable --now docker
+  run_as_root systemctl enable --now docker
 
   print_ok "Docker 설치가 완료되었습니다."
 }
@@ -158,17 +198,18 @@ ensure_docker_repo_ubuntu() {
   need_cmd apt-get
   need_cmd curl
   need_cmd gpg
+  need_cmd dpkg
 
   print_info "사전 패키지 설치를 진행합니다."
-  sudo apt-get update -y
-  sudo apt-get install -y ca-certificates curl gnupg
+  run_as_root apt-get update -y
+  run_as_root apt-get install -y ca-certificates curl gnupg
 
   print_info "Docker GPG 키를 등록합니다."
-  sudo install -m 0755 -d /etc/apt/keyrings
+  run_as_root install -m 0755 -d /etc/apt/keyrings
   if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-      sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      run_as_root gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    run_as_root chmod a+r /etc/apt/keyrings/docker.gpg
   else
     print_info "Docker GPG 키가 이미 등록되어 있습니다."
   fi
@@ -182,12 +223,12 @@ ensure_docker_repo_ubuntu() {
       echo "${VERSION_CODENAME:-}"
     )"
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${codename} stable" | \
-      sudo tee "$list_file" >/dev/null
+      run_as_root tee "$list_file" >/dev/null
   else
     print_info "Docker 저장소가 이미 추가되어 있습니다."
   fi
 
-  sudo apt-get update -y
+  run_as_root apt-get update -y
 }
 
 install_docker_ubuntu_online() {
@@ -197,15 +238,13 @@ install_docker_ubuntu_online() {
   fi
 
   print_info "Docker가 설치되어 있지 않습니다. 온라인 설치를 진행합니다."
-
   ensure_docker_repo_ubuntu
 
   print_info "Docker 패키지 설치를 진행합니다."
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
+  run_as_root apt-get install -y docker-ce docker-ce-cli containerd.io \
     docker-buildx-plugin docker-compose-plugin
 
-  sudo systemctl enable --now docker
-
+  run_as_root systemctl enable --now docker
   print_ok "Docker 설치가 완료되었습니다."
 }
 
@@ -215,38 +254,83 @@ install_docker_ubuntu_online() {
 
 write_monitoring_templates() {
   local outdir="$1"
-  mkdir -p "${outdir}/monitoring/prometheus" "${outdir}/monitoring/alertmanager"
+  mkdir -p "${outdir}/monitoring/prometheus" \
+           "${outdir}/monitoring/alertmanager/templates"
 
-  cat > "${outdir}/monitoring/docker-compose.yml" <<'EOF'
+  cat > "${outdir}/monitoring/docker-compose.yml" <<EOF
 version: "3.8"
 
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:${DEFAULT_PROMETHEUS_TAG}
+    container_name: monitoring-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/rules.yml:/etc/prometheus/rules.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
-    restart: always
+    depends_on:
+      - node-exporter
+      - alertmanager
 
   alertmanager:
-    image: prom/alertmanager:latest
+    image: prom/alertmanager:${DEFAULT_ALERTMANAGER_TAG}
+    container_name: monitoring-alertmanager
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
     volumes:
-      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./alertmanager/templates:/etc/alertmanager/templates:ro
+      - alertmanager-data:/alertmanager
     ports:
       - "9093:9093"
-    restart: always
 
+  # Linux 호스트 기준 컨테이너 방식 예시입니다.
+  # 운영 환경에서 더 정확한 호스트 메트릭이 필요하면 node_exporter를 host에 직접 설치하는 구성이 더 낫습니다.
   node-exporter:
-    image: prom/node-exporter:latest
-    network_mode: host
+    image: prom/node-exporter:${DEFAULT_NODE_EXPORTER_TAG}
+    container_name: monitoring-node-exporter
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+      - --collector.systemd
+      - --collector.processes
     pid: host
     volumes:
-      - "/:/host:ro,rslave"
-    command:
-      - "--path.rootfs=/host"
-    restart: always
+      - /:/host:ro,rslave
+    ports:
+      - "9100:9100"
+
+  # 추후 UI가 필요할 때만 활성화합니다.
+  # docker compose --profile ui up -d
+  grafana:
+    image: grafana/grafana:${DEFAULT_GRAFANA_TAG}
+    container_name: monitoring-grafana
+    restart: unless-stopped
+    profiles:
+      - ui
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: AdminPassword!
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:
+  alertmanager-data:
+  grafana-data:
 EOF
 
   cat > "${outdir}/monitoring/prometheus/prometheus.yml" <<'EOF'
@@ -257,10 +341,15 @@ global:
 rule_files:
   - "rules.yml"
 
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
 scrape_configs:
-  - job_name: "node"
+  - job_name: "node-exporter"
     static_configs:
-      - targets: ["localhost:9100"]
+      - targets: ["node-exporter:9100"]
 EOF
 
   cat > "${outdir}/monitoring/prometheus/rules.yml" <<'EOF'
@@ -286,8 +375,7 @@ groups:
       description: "Memory usage > 85% for 5 minutes"
 
   - alert: HighDiskUsage
-    expr: (node_filesystem_size_bytes{fstype!="tmpfs"} - node_filesystem_free_bytes{fstype!="tmpfs"})
-          / node_filesystem_size_bytes{fstype!="tmpfs"} * 100 > 80
+    expr: 100 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"} * 100) > 80
     for: 10m
     labels:
       severity: critical
@@ -298,6 +386,8 @@ EOF
 
   cat > "${outdir}/monitoring/alertmanager/alertmanager.yml" <<EOF
 global:
+  # 참고: 465는 보통 SMTPS(Implicit TLS) 포트입니다.
+  # Alertmanager는 STARTTLS 구성이 일반적이어서, 메일 서버 정책에 따라 587 사용이 더 잘 맞을 수 있습니다.
   smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
   smtp_from: 'monitor@yourdomain.com'
   smtp_auth_username: 'monitor@yourdomain.com'
@@ -317,31 +407,26 @@ receivers:
     send_resolved: true
 EOF
 
-  print_ok "모니터링 샘플 설정 파일을 생성하였습니다."
+  # 템플릿 폴더 placeholder
+  cat > "${outdir}/monitoring/alertmanager/templates/README.txt" <<'EOF'
+이 폴더는 Alertmanager 알림 템플릿을 넣는 위치입니다.
+EOF
+
+  print_ok "모니터링 샘플 설정 파일을 생성했습니다."
 }
 
 prepare_offline_bundle_rhel() {
   local outdir="$1"
   mkdir -p "${outdir}/pkgs"
-
   need_cmd dnf
-
-  print_info "안내드립니다."
-  print_info "오프라인 번들 준비는 실제 설치할 서버와 동일한 운영체제 버전 및 아키텍처 환경에서 진행하셔야 합니다."
-  print_info "그렇지 않으면 의존성 또는 glibc 차이로 설치가 실패할 수 있습니다."
 
   ensure_docker_repo_rhel
 
-  if ! dnf -q list installed dnf-plugins-core >/dev/null 2>&1; then
-    sudo dnf -y install dnf-plugins-core
-  fi
-
-  print_info "Docker 설치 패키지를 의존성 포함으로 다운로드합니다."
-  # dnf download는 dnf-plugins-core에 포함됩니다.
-  sudo dnf -y download --resolve --destdir "${outdir}/pkgs" \
+  print_info "Docker 설치 RPM 패키지를(의존성 포함) 다운로드합니다."
+  run_as_root dnf -y download --resolve --destdir "${outdir}/pkgs" \
     docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-  print_ok "RPM 패키지 번들을 준비하였습니다."
+  print_ok "RPM 패키지 번들을 준비했습니다."
 }
 
 prepare_offline_bundle_ubuntu() {
@@ -350,25 +435,24 @@ prepare_offline_bundle_ubuntu() {
 
   need_cmd apt-get
 
-  print_info "안내드립니다."
-  print_info "오프라인 번들 준비는 실제 설치할 서버와 동일한 운영체제 버전 및 아키텍처 환경에서 진행하셔야 합니다."
-  print_info "그렇지 않으면 의존성 또는 glibc 차이로 설치가 실패할 수 있습니다."
-
-  # Docker repo가 없으면 docker-ce 패키지를 받지 못합니다.
   print_info "Docker 저장소 설정을 진행합니다."
   if ! command -v curl >/dev/null 2>&1; then
-    sudo apt-get update -y
-    sudo apt-get install -y curl
+    run_as_root apt-get update -y
+    run_as_root apt-get install -y curl
   fi
   if ! command -v gpg >/dev/null 2>&1; then
-    sudo apt-get update -y
-    sudo apt-get install -y gnupg
+    run_as_root apt-get update -y
+    run_as_root apt-get install -y gnupg
   fi
 
   ensure_docker_repo_ubuntu
 
+  print_info "기존 apt 캐시를 정리합니다(불필요한 .deb 섞임 방지)."
+  run_as_root apt-get clean
+
   print_info "Docker 패키지를 다운로드 전용으로 수집합니다."
-  sudo apt-get install -y --download-only docker-ce docker-ce-cli containerd.io \
+  run_as_root apt-get update -y
+  run_as_root apt-get install -y --download-only docker-ce docker-ce-cli containerd.io \
     docker-buildx-plugin docker-compose-plugin
 
   print_info "다운로드된 .deb 파일을 번들에 복사합니다."
@@ -378,13 +462,13 @@ prepare_offline_bundle_ubuntu() {
   shopt -u nullglob
 
   if [[ ${#debs[@]} -eq 0 ]]; then
-    print_error "다운로드된 .deb 파일을 찾지 못하였습니다."
-    print_error "Docker 저장소 설정 또는 네트워크 상태를 확인해 주십시오."
+    print_error "다운로드된 .deb 파일을 찾지 못했습니다."
+    print_error "Docker 저장소 설정 또는 네트워크 상태를 확인해주세요."
     exit 1
   fi
 
-  cp -v "${debs[@]}" "${outdir}/pkgs/" >/dev/null
-  print_ok "DEB 패키지 번들을 준비하였습니다."
+  cp -v "${debs[@]}" "${outdir}/pkgs/"
+  print_ok "DEB 패키지 번들을 준비했습니다."
 }
 
 save_monitoring_images() {
@@ -395,12 +479,12 @@ save_monitoring_images() {
   need_cmd docker
 
   local prom_tag am_tag ne_tag graf_tag
-  prom_tag="$(ask "prom/prometheus 버전을 입력해 주십시오" "latest")"
-  am_tag="$(ask "prom/alertmanager 버전을 입력해 주십시오" "latest")"
-  ne_tag="$(ask "prom/node-exporter 버전을 입력해 주십시오" "latest")"
-  graf_tag="latest"
+  prom_tag="$(ask "prom/prometheus 버전을 입력해주세요" "${DEFAULT_PROMETHEUS_TAG}")"
+  am_tag="$(ask "prom/alertmanager 버전을 입력해주세요" "${DEFAULT_ALERTMANAGER_TAG}")"
+  ne_tag="$(ask "prom/node-exporter 버전을 입력해주세요" "${DEFAULT_NODE_EXPORTER_TAG}")"
+  graf_tag="${DEFAULT_GRAFANA_TAG}"
   if [[ "$include_grafana" == "Y" ]]; then
-    graf_tag="$(ask "grafana/grafana 버전을 입력해 주십시오" "latest")"
+    graf_tag="$(ask "grafana/grafana 버전을 입력해주세요" "${DEFAULT_GRAFANA_TAG}")"
   fi
 
   local images=("prom/prometheus:${prom_tag}" "prom/alertmanager:${am_tag}" "prom/node-exporter:${ne_tag}")
@@ -410,13 +494,13 @@ save_monitoring_images() {
 
   print_info "이미지를 다운로드(pull)합니다."
   for img in "${images[@]}"; do
-    docker pull "$img"
+    run_as_root docker pull "$img"
   done
 
   print_info "이미지를 tar 파일로 저장합니다."
-  docker save -o "${outdir}/images/monitoring-images.tar" "${images[@]}"
+  run_as_root docker save -o "${outdir}/images/monitoring-images.tar" "${images[@]}"
 
-  print_ok "이미지 번들을 준비하였습니다. (monitoring-images.tar)"
+  print_ok "이미지 번들을 준비했습니다. (monitoring-images.tar)"
 }
 
 ########################################
@@ -431,26 +515,35 @@ install_from_bundle() {
     exit 1
   fi
 
-  print_info "번들 경로는 ${bundle} 입니다."
+  print_info "번들 경로: ${bundle}"
 
   if [[ -d "${bundle}/pkgs" ]]; then
     if command -v dnf &>/dev/null; then
       print_info "RPM 패키지 설치를 진행합니다."
-      sudo dnf localinstall -y "${bundle}/pkgs/"*.rpm
-    elif command -v apt-get &>/dev/null; then
+      run_as_root dnf localinstall -y "${bundle}/pkgs/"*.rpm
+    elif command -v apt &>/dev/null; then
       print_info "DEB 패키지 설치를 진행합니다."
-      sudo dpkg -i "${bundle}/pkgs/"*.deb
+      # apt는 로컬 파일 설치 시 의존성 해석이 dpkg보다 편합니다(번들에 의존성 포함 가정).
+      run_as_root apt -y install "${bundle}/pkgs/"*.deb || {
+        print_warn "apt 설치가 실패했습니다. dpkg 방식으로 재시도합니다."
+        run_as_root dpkg -i "${bundle}/pkgs/"*.deb || true
+        print_warn "의존성 문제가 남아 있다면, 번들에 누락된 .deb가 없는지 확인해주세요."
+      }
+    elif command -v dpkg &>/dev/null; then
+      print_info "DEB 패키지 설치를 진행합니다."
+      run_as_root dpkg -i "${bundle}/pkgs/"*.deb || true
+      print_warn "의존성 문제가 남아 있다면, 번들에 누락된 .deb가 없는지 확인해주세요."
     else
       print_error "지원되지 않는 패키지 관리자입니다."
       exit 1
     fi
   else
-    print_warn "pkgs 디렉토리가 존재하지 않습니다. 패키지 설치를 건너뜁니다."
+    print_warn "pkgs 디렉터리가 없습니다. 패키지 설치는 건너뜁니다."
   fi
 
   if command -v systemctl >/dev/null 2>&1; then
     print_info "Docker 서비스를 활성화 및 시작합니다."
-    sudo systemctl enable --now docker || true
+    run_as_root systemctl enable --now docker || true
   fi
 
   if [[ -f "${bundle}/images/monitoring-images.tar" ]]; then
@@ -458,15 +551,17 @@ install_from_bundle() {
     print_info "Docker 이미지를 로드합니다."
     docker load -i "${bundle}/images/monitoring-images.tar"
   else
-    print_warn "이미지 파일이 존재하지 않습니다. 이미지 로드를 건너뜁니다."
+    print_warn "이미지 파일이 없습니다. 이미지 로드는 건너뜁니다."
   fi
 
   if [[ -f "${bundle}/monitoring/docker-compose.yml" ]]; then
     need_cmd docker
     print_info "Monitoring 서비스를 기동합니다."
     (cd "${bundle}/monitoring" && docker compose up -d)
+    print_info "Grafana가 필요하면 다음 명령으로 올리시면 됩니다."
+    print_info "  (cd \"${bundle}/monitoring\" && docker compose --profile ui up -d)"
   else
-    print_warn "docker-compose.yml 파일이 존재하지 않습니다. 기동을 건너뜁니다."
+    print_warn "docker-compose.yml 파일이 없습니다. 기동은 건너뜁니다."
   fi
 
   print_ok "오프라인 설치가 완료되었습니다."
@@ -480,11 +575,13 @@ install_from_bundle() {
 ########################################
 
 menu_prepare_bundle() {
-  local outdir
-  outdir="$(ask "번들을 생성할 경로(폴더)를 입력해 주십시오" "$(pwd)/bundle-$(date +%Y%m%d-%H%M%S)")"
-  mkdir -p "$outdir"
+  # 요구사항: 오프라인 번들 준비 선택 시 '가장 먼저' 안내/확인
+  confirm_offline_bundle_env || return 0
 
-  print_ok "번들 디렉토리를 생성하였습니다. (${outdir})"
+  local outdir
+  outdir="$(ask "번들을 생성할 경로(폴더)를 입력해주세요" "$(pwd)/bundle-$(date +%Y%m%d-%H%M%S)")"
+  mkdir -p "$outdir"
+  print_ok "번들 디렉터리를 생성했습니다. (${outdir})"
 
   local include_templates
   include_templates="$(ask_yn "모니터링 설정 샘플 파일을 생성하시겠습니까?" "Y")"
@@ -509,7 +606,7 @@ menu_prepare_bundle() {
   include_images="$(ask_yn "Prometheus/Alertmanager/node_exporter 이미지 번들을 생성하시겠습니까? (Docker 필요)" "Y")"
   if [[ "$include_images" == "Y" ]]; then
     if ! is_docker_installed; then
-      print_warn "Docker가 설치되어 있지 않습니다. 이미지를 번들로 만들려면 Docker 설치가 필요합니다."
+      print_warn "Docker가 설치되어 있지 않습니다. 이미지 번들 생성에는 Docker가 필요합니다."
       local install_now
       install_now="$(ask_yn "지금 Docker 온라인 설치를 진행하시겠습니까?" "Y")"
       if [[ "$install_now" == "Y" ]]; then
@@ -522,20 +619,20 @@ menu_prepare_bundle() {
           exit 1
         fi
       else
-        print_warn "이미지 번들 생성을 건너뜁니다."
+        print_warn "이미지 번들 생성은 건너뜁니다."
       fi
     fi
 
     if is_docker_installed; then
       local with_grafana
-      with_grafana="$(ask_yn "Grafana를 함께 포함하시겠습니까?" "N")"
+      with_grafana="$(ask_yn "Grafana 이미지도 함께 포함하시겠습니까?" "N")"
       save_monitoring_images "$outdir" "$with_grafana"
     fi
   fi
 
   print_ok "번들 준비가 완료되었습니다."
-  print_info "안내드립니다. 해당 폴더 전체를 폐쇄망 서버로 반입하시면 됩니다."
-  print_info "폐쇄망 서버에서는 본 스크립트의 '오프라인 번들 설치' 메뉴를 이용하시면 됩니다."
+  print_info "해당 폴더 전체를 폐쇄망 서버로 반입하시면 됩니다."
+  print_info "폐쇄망 서버에서는 이 스크립트의 '오프라인 번들 설치' 메뉴를 사용해주세요."
 }
 
 menu_online_install() {
@@ -564,7 +661,7 @@ main() {
   echo ""
 
   local choice
-  choice="$(ask "번호를 선택해 주십시오" "1")"
+  choice="$(ask "번호를 선택해주세요" "1")"
 
   case "$choice" in
     1)
@@ -578,7 +675,7 @@ main() {
       ;;
     4)
       local bundle
-      bundle="$(ask "반입한 번들 디렉터리 경로를 입력해 주십시오" "$(pwd)")"
+      bundle="$(ask "반입한 번들 디렉터리 경로를 입력해주세요" "$(pwd)")"
       install_from_bundle "$bundle"
       ;;
     5)
