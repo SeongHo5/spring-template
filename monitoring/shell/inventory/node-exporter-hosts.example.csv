@@ -1,0 +1,5 @@
+# host,user,ssh_port,target_host,target_port,extra_args,enabled
+host,user,ssh_port,target_host,target_port,extra_args,enabled
+10.0.10.11,ec2-user,22,10.0.10.11,19100,--collector.systemd --collector.processes,true
+10.0.10.12,ec2-user,22,10.0.10.12,19100,--collector.systemd --collector.processes,true
+# enabled를 false/no/0 로 두면 배포와 targets 반영에서 제외됩니다.
