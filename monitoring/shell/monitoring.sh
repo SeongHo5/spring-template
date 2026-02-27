@@ -237,7 +237,7 @@ write_node_exporter_service_templates() {
   cat > "${outdir}/node-exporter/node_exporter.env" <<'EOF'
 # node_exporter 실행 옵션
 # 필요 시 수정해서 사용하세요.
-NODE_EXPORTER_ARGS="--web.listen-address=:9100 --collector.systemd --collector.processes"
+NODE_EXPORTER_ARGS="--web.listen-address=:19100 --collector.systemd --collector.processes"
 EOF
 
   cat > "${outdir}/node-exporter/node_exporter.service" <<'EOF'
@@ -316,7 +316,7 @@ install_node_exporter_from_bundle() {
   else
     # 기본값
     run_as_root bash -c 'cat > /etc/node_exporter/node_exporter.env <<EOF
-NODE_EXPORTER_ARGS="--web.listen-address=:9100 --collector.systemd --collector.processes"
+NODE_EXPORTER_ARGS="--web.listen-address=:19100 --collector.systemd --collector.processes"
 EOF'
   fi
 
@@ -330,7 +330,7 @@ EOF'
   run_as_root systemctl daemon-reload
   run_as_root systemctl enable --now node_exporter
 
-  print_ok "node_exporter(host) 설치 및 기동이 완료되었습니다. (port 9100)"
+  print_ok "node_exporter(host) 설치 및 기동이 완료되었습니다. (port 19100)"
 }
 
 install_node_exporter_online() {
@@ -552,10 +552,10 @@ alerting:
         - targets: ["alertmanager:9093"]
 
 scrape_configs:
-  # node_exporter는 host에 설치되어 있고, 9100 포트를 사용한다고 가정합니다.
+  # node_exporter는 host에 설치되어 있고, 19100 포트를 사용한다고 가정합니다.
   - job_name: "node-exporter"
     static_configs:
-      - targets: ["localhost:9100"]
+      - targets: ["localhost:19100"]
 EOF
 
   cat > "${outdir}/monitoring/prometheus/rules.yml" <<'EOF'
