@@ -1,6 +1,6 @@
 services:
   prometheus:
-    image: prom/prometheus:v2.51.2
+    image: prom/prometheus:v3.10.0
     container_name: monitoring-prometheus
     restart: unless-stopped
     command:
@@ -21,7 +21,7 @@ services:
       - alertmanager
 
   alertmanager:
-    image: prom/alertmanager:v0.27.0
+    image: prom/alertmanager:v0.31.0
     container_name: monitoring-alertmanager
     restart: unless-stopped
     command:
@@ -40,7 +40,7 @@ services:
   # 운영 환경에서 더 정확한 호스트 메트릭이 필요하면 node_exporter를 host에 직접 설치하세요.
   node-exporter:
     # 호스트 CPU/메모리/디스크/파일시스템 메트릭 노출
-    image: quay.io/prometheus/node-exporter:v1.8.1
+    image: prom/node-exporter:v0.10.2
     container_name: monitoring-node-exporter
     restart: unless-stopped
     command:
@@ -61,7 +61,7 @@ services:
   # 추후 UI 필요할 때만 활성화:
   # docker compose --profile ui up -d
   grafana:
-    image: grafana/grafana:10.4.2
+    image: grafana/grafana:12.3.4
     container_name: monitoring-grafana
     restart: unless-stopped
     profiles:
