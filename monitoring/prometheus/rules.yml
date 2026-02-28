@@ -1,8 +1,9 @@
 groups:
-  # 호스트 리소스(CPU/메모리/디스크) 관련 기본 알람 룰
-  - name: host-resource-alerts
+  ############################################################
+  # Instance
+  ############################################################
+  - name: target-health-alerts
     rules:
-      # 타겟이 내려가서 scrape 자체가 실패하는 경우
       - alert: InstanceDown
         expr: up == 0
         # 2분 이상 지속될 때만 알림
@@ -10,45 +11,182 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Instance down ({{ $labels.instance }})"
-          description: "Target {{ $labels.job }}/{{ $labels.instance }} is unreachable."
+          summary: "인스턴스 다운 ({{ $labels.instance }})"
+          description: "대상 {{ $labels.job }}/{{ $labels.instance }} 에 접속할 수 없습니다(수집 실패). 네트워크/방화벽/서비스 상태를 확인하세요."
 
-      # 5분 평균 CPU 사용률이 85% 초과
+      - alert: NodeExporterScrapeLowSamples
+        expr: scrape_samples_scraped{job=~".*node.*|node-exporter"} < 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "수집 샘플 수가 비정상적으로 적음 ({{ $labels.instance }})"
+          description: "수집된 샘플 수가 너무 적습니다. node_exporter collector 비활성/권한 문제/메트릭 노출 이상 가능성이 있습니다."
+
+  ############################################################
+  # CPU
+  ############################################################
+  - name: host-cpu-alerts
+    rules:
       - alert: HostHighCpuUsage
-        expr: (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 85
+        expr: 100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 85
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "High CPU usage ({{ $labels.instance }})"
-          description: "CPU usage is above 85% for 10 minutes."
+          summary: "CPU 사용률 높음 ({{ $labels.instance }})"
+          description: "최근 10분 동안 CPU 사용률이 85%를 초과했습니다. 트래픽 급증/스레드 폭주/배치 작업 등을 확인하세요."
 
-      # 메모리 사용률이 90% 초과
-      - alert: HostHighMemoryUsage
-        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+      - alert: HostHighCpuIOWait
+        expr: 100 * avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) > 15
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "High memory usage ({{ $labels.instance }})"
-          description: "Memory usage is above 90% for 10 minutes."
+          summary: "CPU iowait 비중 높음 ({{ $labels.instance }})"
+          description: "최근 10분 동안 iowait 비중이 15%를 초과했습니다. 디스크/스토리지 병목 가능성이 큽니다."
 
-      # 디스크 사용률이 85% 초과 (tmpfs/overlay, /run 계열 제외)
-      - alert: HostDiskUsageHigh
-        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay",mountpoint!~"/run.*"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay",mountpoint!~"/run.*"})) * 100 > 85
+      - alert: HostHighCpuSteal
+        expr: 100 * avg by (instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU steal 시간 높음 ({{ $labels.instance }})"
+          description: "최근 10분 동안 CPU steal 비중이 5%를 초과했습니다. 가상화 환경에서 호스트 과점유/리소스 경쟁 가능성이 있습니다."
+
+      - alert: HostLoadHigh1m
+        expr: (node_load1) / count by (instance) (node_cpu_seconds_total{mode="idle"}) > 1.2
         for: 15m
         labels:
           severity: warning
         annotations:
-          summary: "High disk usage ({{ $labels.instance }}:{{ $labels.mountpoint }})"
-          description: "Disk usage is above 85% for 15 minutes on {{ $labels.mountpoint }}."
+          summary: "Load(1m) 높음 ({{ $labels.instance }})"
+          description: "최근 15분 동안 코어 수 대비 1분 Load 평균이 높습니다. CPU 포화 또는 작업 큐 적체 가능성이 있습니다."
 
-      # 최근 6시간 추세 기준 24시간 이내 디스크 소진 예측
+      - alert: HostLoadHigh5m
+        expr: (node_load5) / count by (instance) (node_cpu_seconds_total{mode="idle"}) > 1.0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Load(5m) 높음 ({{ $labels.instance }})"
+          description: "최근 30분 동안 코어 수 대비 5분 Load 평균이 높습니다. 장기적인 처리 지연/리소스 부족을 확인하세요."
+
+      - alert: HostContextSwitchesHigh
+        expr: rate(node_context_switches_total[5m]) > 200000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "컨텍스트 스위치 폭증 ({{ $labels.instance }})"
+          description: "최근 10분 동안 컨텍스트 스위치가 비정상적으로 많습니다. 스레드 과다/락 경합/짧은 작업 폭주 가능성이 있습니다."
+
+  ############################################################
+  # Memory
+  ############################################################
+  - name: host-memory-alerts
+    rules:
+      - alert: HostHighMemoryUsage
+        expr: 100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "메모리 사용률 높음 ({{ $labels.instance }})"
+          description: "최근 10분 동안 메모리 사용률이 90%를 초과했습니다. 캐시/버퍼 증가, 메모리 누수, 워크로드 급증을 확인하세요."
+
+      - alert: HostLowMemAvailableAbs
+        expr: node_memory_MemAvailable_bytes < 1024 * 1024 * 1024
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "가용 메모리 부족 ({{ $labels.instance }})"
+          description: "최근 10분 동안 가용 메모리가 1GiB 미만입니다. OOM 위험이 있으니 상위 프로세스 메모리 사용량을 확인하세요."
+
+      - alert: HostSwapUsageHigh
+        expr: (node_memory_SwapTotal_bytes > 0) and (100 * (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) > 50)
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "스왑 사용률 높음 ({{ $labels.instance }})"
+          description: "최근 15분 동안 스왑 사용률이 50%를 초과했습니다. 메모리 압박이 지속되고 있을 가능성이 큽니다."
+
+      - alert: HostSwapInOutActive
+        expr: (rate(node_vmstat_pswpin[5m]) + rate(node_vmstat_pswpout[5m])) > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "스왑 in/out 발생 ({{ $labels.instance }})"
+          description: "최근 10분 동안 스왑 in/out이 지속 발생했습니다. 메모리 부족 또는 스래싱 가능성이 있습니다."
+
+      - alert: HostOOMKillsDetected
+        expr: increase(node_vmstat_oom_kill[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "OOM Kill 발생 ({{ $labels.instance }})"
+          description: "최근 5분 내 OOM Kill이 감지되었습니다. 메모리 사용 상위 프로세스/컨테이너를 즉시 확인하세요."
+
+      - alert: HostMajorPageFaultsHigh
+        expr: rate(node_vmstat_pgmajfault[5m]) > 200
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Major page fault 증가 ({{ $labels.instance }})"
+          description: "최근 10분 동안 major page fault가 높습니다. 메모리 압박/디스크 스왑/캐시 미스 증가를 의심하세요."
+
+  ############################################################
+  # File System
+  ############################################################
+  - name: host-filesystem-alerts
+    rules:
+      - alert: HostDiskUsageHigh
+        expr: 100 * (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|aufs",mountpoint!~"/run.*"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|aufs",mountpoint!~"/run.*"})) > 85
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "디스크 사용률 높음 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "최근 15분 동안 {{ $labels.mountpoint }} 디스크 사용률이 85%를 초과했습니다. 로그/덤프/데이터 적재를 확인하세요."
+
+      - alert: HostInodesUsageHigh
+        expr: 100 * (1 - (node_filesystem_files_free{fstype!~"tmpfs|overlay|squashfs|aufs",mountpoint!~"/run.*"} / node_filesystem_files{fstype!~"tmpfs|overlay|squashfs|aufs",mountpoint!~"/run.*"})) > 85
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "inode 사용률 높음 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "최근 30분 동안 {{ $labels.mountpoint }} inode 사용률이 85%를 초과했습니다. 작은 파일(로그/캐시) 폭증 가능성이 큽니다."
+
+      - alert: HostFilesystemReadOnly
+        expr: node_filesystem_readonly{fstype!~"tmpfs|overlay|squashfs|aufs"} == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "파일시스템이 Read-Only로 전환됨 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "{{ $labels.mountpoint }} 파일시스템이 read-only 상태입니다. 커널/스토리지 오류 또는 파일시스템 손상 가능성이 있습니다."
+
       - alert: HostDiskWillFillSoon
-        expr: predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay",mountpoint!~"/run.*"}[6h], 24 * 3600) < 0
+        expr: predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|aufs",mountpoint!~"/run.*"}[6h], 24 * 3600) < 0
         for: 30m
         labels:
           severity: critical
         annotations:
-          summary: "Disk will fill in 24h ({{ $labels.instance }}:{{ $labels.mountpoint }})"
-          description: "Predicted free space is less than 0 bytes in the next 24h."
+          summary: "24시간 내 디스크 소진 예측 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "최근 6시간 추세 기준으로 24시간 이내 {{ $labels.mountpoint }}의 여유 공간이 소진될 것으로 예측됩니다."
+
+      - alert: HostInodesWillFillSoon
+        expr: predict_linear(node_filesystem_files_free{fstype!~"tmpfs|overlay|squashfs|aufs",mountpoint!~"/run.*"}[6h], 24 * 3600) < 0
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "24시간 내 inode 소진 예측 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          description: "최근 6시간 추세 기준으로 24시간 이내 {{ $labels.mountpoint }}의 inode가 소진될 것으로 예측됩니다."
