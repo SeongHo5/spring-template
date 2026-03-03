@@ -199,7 +199,7 @@ main() {
 
   local work_tmp
   work_tmp="$(mktemp -d)"
-  trap 'rm -rf "${work_tmp}"' EXIT
+  trap 'rm -rf "${work_tmp:-}"' RETURN
 
   local tar_path="${tarball}"
   if [[ -z "${tar_path}" ]]; then
