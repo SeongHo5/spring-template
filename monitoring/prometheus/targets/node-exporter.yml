@@ -2,3 +2,4 @@
     - 127.0.0.1:19100
   labels:
     job: node-exporter
+    server: "dev-22"

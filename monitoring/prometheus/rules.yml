@@ -11,8 +11,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "인스턴스 다운 ({{ $labels.instance }})"
-          description: "대상 {{ $labels.job }}/{{ $labels.instance }} 에 접속할 수 없습니다(수집 실패). 네트워크/방화벽/서비스 상태를 확인하세요."
+          summary: "인스턴스 다운 ({{ $labels.server }})"
+          description: "대상 {{ $labels.server }} - {{ $labels.job }} 에 접근할 수 없습니다(수집 실패). 네트워크/방화벽/서비스 상태를 확인하세요."
 
       - alert: NodeExporterScrapeLowSamples
         expr: scrape_samples_scraped{job=~".*node.*|node-exporter"} < 50
@@ -20,7 +20,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "수집 샘플 수가 비정상적으로 적음 ({{ $labels.instance }})"
+          summary: "수집 샘플 수가 비정상적으로 적음 ({{ $labels.server }})"
           description: "수집된 샘플 수가 너무 적습니다. node_exporter collector 비활성/권한 문제/메트릭 노출 이상 가능성이 있습니다."
 
   ############################################################
@@ -34,7 +34,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "CPU 사용률 높음 ({{ $labels.instance }})"
+          summary: "CPU 사용률 높음 ({{ $labels.server }})"
           description: "최근 10분 동안 CPU 사용률이 85%를 초과했습니다. 트래픽 급증/스레드 폭주/배치 작업 등을 확인하세요."
 
       - alert: HostHighCpuIOWait
@@ -43,7 +43,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "CPU iowait 비중 높음 ({{ $labels.instance }})"
+          summary: "CPU iowait 비중 높음 ({{ $labels.server }})"
           description: "최근 10분 동안 iowait 비중이 15%를 초과했습니다. 디스크/스토리지 병목 가능성이 큽니다."
 
       - alert: HostHighCpuSteal
@@ -52,7 +52,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "CPU steal 시간 높음 ({{ $labels.instance }})"
+          summary: "CPU steal 시간 높음 ({{ $labels.server }})"
           description: "최근 10분 동안 CPU steal 비중이 5%를 초과했습니다. 가상화 환경에서 호스트 과점유/리소스 경쟁 가능성이 있습니다."
 
       - alert: HostLoadHigh1m
@@ -61,7 +61,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Load(1m) 높음 ({{ $labels.instance }})"
+          summary: "Load(1m) 높음 ({{ $labels.server }})"
           description: "최근 15분 동안 코어 수 대비 1분 Load 평균이 높습니다. CPU 포화 또는 작업 큐 적체 가능성이 있습니다."
 
       - alert: HostLoadHigh5m
@@ -70,7 +70,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Load(5m) 높음 ({{ $labels.instance }})"
+          summary: "Load(5m) 높음 ({{ $labels.server }})"
           description: "최근 30분 동안 코어 수 대비 5분 Load 평균이 높습니다. 장기적인 처리 지연/리소스 부족을 확인하세요."
 
       - alert: HostContextSwitchesHigh
@@ -79,7 +79,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "컨텍스트 스위치 폭증 ({{ $labels.instance }})"
+          summary: "컨텍스트 스위치 폭증 ({{ $labels.server }})"
           description: "최근 10분 동안 컨텍스트 스위치가 비정상적으로 많습니다. 스레드 과다/락 경합/짧은 작업 폭주 가능성이 있습니다."
 
   ############################################################
@@ -93,7 +93,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "메모리 사용률 높음 ({{ $labels.instance }})"
+          summary: "메모리 사용률 높음 ({{ $labels.server }})"
           description: "최근 10분 동안 메모리 사용률이 90%를 초과했습니다. 캐시/버퍼 증가, 메모리 누수, 워크로드 급증을 확인하세요."
 
       - alert: HostLowMemAvailableAbs
@@ -102,7 +102,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "가용 메모리 부족 ({{ $labels.instance }})"
+          summary: "가용 메모리 부족 ({{ $labels.server }})"
           description: "최근 10분 동안 가용 메모리가 1GiB 미만입니다. OOM 위험이 있으니 상위 프로세스 메모리 사용량을 확인하세요."
 
       - alert: HostSwapUsageHigh
@@ -111,7 +111,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "스왑 사용률 높음 ({{ $labels.instance }})"
+          summary: "스왑 사용률 높음 ({{ $labels.server }})"
           description: "최근 15분 동안 스왑 사용률이 50%를 초과했습니다. 메모리 압박이 지속되고 있을 가능성이 큽니다."
 
       - alert: HostSwapInOutActive
@@ -120,7 +120,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "스왑 in/out 발생 ({{ $labels.instance }})"
+          summary: "스왑 in/out 발생 ({{ $labels.server }})"
           description: "최근 10분 동안 스왑 in/out이 지속 발생했습니다. 메모리 부족 또는 스래싱 가능성이 있습니다."
 
       - alert: HostOOMKillsDetected
@@ -129,7 +129,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "OOM Kill 발생 ({{ $labels.instance }})"
+          summary: "OOM Kill 발생 ({{ $labels.server }})"
           description: "최근 5분 내 OOM Kill이 감지되었습니다. 메모리 사용 상위 프로세스/컨테이너를 즉시 확인하세요."
 
       - alert: HostMajorPageFaultsHigh
@@ -138,7 +138,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Major page fault 증가 ({{ $labels.instance }})"
+          summary: "Major page fault 증가 ({{ $labels.server }})"
           description: "최근 10분 동안 major page fault가 높습니다. 메모리 압박/디스크 스왑/캐시 미스 증가를 의심하세요."
 
   ############################################################
@@ -152,7 +152,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "디스크 사용률 높음 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          summary: "디스크 사용률 높음 ({{ $labels.server }}:{{ $labels.mountpoint }})"
           description: "최근 15분 동안 {{ $labels.mountpoint }} 디스크 사용률이 85%를 초과했습니다. 로그/덤프/데이터 적재를 확인하세요."
 
       - alert: HostInodesUsageHigh
@@ -161,7 +161,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "inode 사용률 높음 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          summary: "inode 사용률 높음 ({{ $labels.server }}:{{ $labels.mountpoint }})"
           description: "최근 30분 동안 {{ $labels.mountpoint }} inode 사용률이 85%를 초과했습니다. 작은 파일(로그/캐시) 폭증 가능성이 큽니다."
 
       - alert: HostFilesystemReadOnly
@@ -170,7 +170,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "파일시스템이 Read-Only로 전환됨 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          summary: "파일시스템이 Read-Only로 전환됨 ({{ $labels.server }}:{{ $labels.mountpoint }})"
           description: "{{ $labels.mountpoint }} 파일시스템이 read-only 상태입니다. 커널/스토리지 오류 또는 파일시스템 손상 가능성이 있습니다."
 
       - alert: HostDiskWillFillSoon
@@ -179,7 +179,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "24시간 내 디스크 소진 예측 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          summary: "24시간 내 디스크 소진 예측 ({{ $labels.server }}:{{ $labels.mountpoint }})"
           description: "최근 6시간 추세 기준으로 24시간 이내 {{ $labels.mountpoint }}의 여유 공간이 소진될 것으로 예측됩니다."
 
       - alert: HostInodesWillFillSoon
@@ -188,5 +188,5 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "24시간 내 inode 소진 예측 ({{ $labels.instance }}:{{ $labels.mountpoint }})"
+          summary: "24시간 내 inode 소진 예측 ({{ $labels.server }}:{{ $labels.mountpoint }})"
           description: "최근 6시간 추세 기준으로 24시간 이내 {{ $labels.mountpoint }}의 inode가 소진될 것으로 예측됩니다."
