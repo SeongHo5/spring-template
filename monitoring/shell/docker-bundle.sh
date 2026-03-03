@@ -257,9 +257,9 @@ EOF_RULES
     cat > "${outdir}/monitoring/alertmanager/alertmanager.yml" <<'EOF_ALERT'
 global:
   smtp_smarthost: 'smtp.mailplug.co.kr:465'
-  smtp_from: 'monitor@yourdomain.com'
-  smtp_auth_username: 'monitor@yourdomain.com'
-  smtp_auth_password: 'PASSWORD'
+  smtp_from: 'no-reply@pntbiz.com'
+  smtp_auth_username: 'no-reply@pntbiz.com'
+  smtp_auth_password: 'rkskek12345'
   smtp_require_tls: true
 
 route:
@@ -268,7 +268,7 @@ route:
 receivers:
 - name: 'email-alert'
   email_configs:
-  - to: 'admin@yourdomain.com'
+  - to: 'username@pntbiz.com'
     send_resolved: true
 EOF_ALERT
   fi
@@ -281,7 +281,6 @@ EOF_ALERT
 - targets:
     - host.docker.internal:19100
   labels:
-    job: node-exporter
 EOF_TARGETS
 
   print_ok "모니터링 설정 템플릿을 준비했습니다."

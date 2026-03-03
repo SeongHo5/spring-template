@@ -1,24 +1,18 @@
 global:
   # 알람 해제(resolve) 상태 처리 시 대기 시간
   resolve_timeout: 5m
-  # SMTP 서버 주소 (예: Gmail SMTP, 사내 SMTP)
-  smtp_smarthost: "smtp.example.com:587"
-  # 발신자 주소
-  smtp_from: "monitor@example.com"
-  # SMTP 인증 계정/비밀번호
-  smtp_auth_username: "monitor@example.com"
-  smtp_auth_password: "CHANGE_ME"
-  # SMTP TLS 사용 여부
+  # SMTP 서버 주소
+  smtp_smarthost: "smtp.mailplug.co.kr:465"
+  smtp_from: "no-reply@pntbiz.com"
+  smtp_auth_username: "no-reply@pntbiz.com"
+  smtp_auth_password: "YOUR_PASSWORD"
   smtp_require_tls: true
 
 templates:
-  # 메일 제목/본문 템플릿 파일 경로
   - /etc/alertmanager/templates/*.tmpl
 
 route:
-  # 기본 수신자
   receiver: email-default
-  # 같은 그룹으로 묶을 라벨 키
   group_by: ["alertname", "job", "instance"]
   # 첫 알림 전 대기
   group_wait: 30s
@@ -27,17 +21,18 @@ route:
   # 동일 알람 재전송 주기
   repeat_interval: 4h
   routes:
-    # severity=critical 은 별도 수신자로 라우팅
+    # CRITICAL은 별도 수신자로 라우팅 분리
     - receiver: email-critical
       matchers:
         - severity="critical"
       repeat_interval: 30m
 
 receivers:
-  # 기본 경고/알람 메일 수신
+  # 기본 경고/알람 메일 수신자
   - name: email-default
     email_configs:
-      - to: "oncall@example.com"
+        # 수신자 메일 주소 (여러 개인 경우 콤마(,)로 구분)
+      - to: "YOUR_EMAIL@pntbiz.com"
         # 알람 해제 시점에도 메일 발송
         send_resolved: true
         headers:
@@ -46,13 +41,14 @@ receivers:
         # 템플릿 기반 HTML 본문
         html: '{{ template "email.default.html" . }}'
 
-  # 치명(CRITICAL) 알람 전용 수신자
+  # CRITICAL 알림 전용 수신자
   - name: email-critical
     email_configs:
-      - to: "oncall@example.com,manager@example.com"
+        # 수신자 메일 주소 (여러 개인 경우 콤마(,)로 구분)
+      - to: "YOUR_EMAIL@pntbiz.com"
         send_resolved: true
         headers:
-          subject: '{{ template "email.critical.subject" . }}'
+          subject: '{{ template "email.default.subject" . }}'
         html: '{{ template "email.default.html" . }}'
 
 inhibit_rules:

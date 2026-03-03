@@ -12,7 +12,7 @@ groups:
           severity: critical
         annotations:
           summary: "인스턴스 다운 ({{ $labels.server }})"
-          description: "대상 {{ $labels.server }} - {{ $labels.job }} 에 접근할 수 없습니다(수집 실패). 네트워크/방화벽/서비스 상태를 확인하세요."
+          description: "대상 {{ $labels.server }}/{{ $labels.job }} 에 접근할 수 없습니다(수집 실패). 네트워크/방화벽/서비스 상태를 확인하세요."
 
       - alert: NodeExporterScrapeLowSamples
         expr: scrape_samples_scraped{job=~".*node.*|node-exporter"} < 50

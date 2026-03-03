@@ -1,6 +1,4 @@
-{{ define "email.default.subject" }}
-[{{ .Status | toUpper }}] [{{ (or .CommonLabels.severity "unknown") | toUpper }}] [{{ or .CommonLabels.site "UNKNOWN_SITE" }}] {{ or .CommonAnnotations.summary .CommonLabels.alertname }}
-{{ end }}
+{{ define "email.default.subject" }}{{ if gt (len .Alerts.Firing) 0 }}[{{ (or .CommonLabels.severity "unknown") | toUpper }}] [{{ or .CommonLabels.site "UNKNOWN_SITE" }}] {{ or .CommonAnnotations.summary .CommonLabels.alertname }}{{ else }}[{{ or .CommonLabels.site "UNKNOWN_SITE" }}] 모든 알림이 정상 복구되었습니다.{{ end }}{{ end }}
 {{ define "email.default.html" }}
 <!--
 Style and HTML derived from https://github.com/mailgun/transactional-email-templates
@@ -33,13 +31,7 @@ SOFTWARE.
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>
-{{ if gt (len .Alerts.Firing) 0 }}
-[{{ (or .CommonLabels.severity "unknown") | toUpper }}] [{{ or .CommonLabels.site "UNKNOWN_SITE" }}] {{ or .CommonAnnotations.summary .CommonLabels.alertname }}
-{{ else }}
-[{{ or .CommonLabels.site "UNKNOWN_SITE" }}] 모든 알림이 정상 해제되었습니다.
-{{ end}}
-</title>
+<title>{{ if gt (len .Alerts.Firing) 0 }}[{{ (or .CommonLabels.severity "unknown") | toUpper }}] [{{ or .CommonLabels.site "UNKNOWN_SITE" }}] {{ or .CommonAnnotations.summary .CommonLabels.alertname }}{{ else }}[{{ or .CommonLabels.site "UNKNOWN_SITE" }}] 모든 알림이 정상 복구되었습니다.{{ end }}</title>
 <style>
 @media only screen and (max-width: 640px) {
   body {
@@ -101,7 +93,7 @@ h4 {
             </td>
             {{ else }}
             <td class="alert alert-good" style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; vertical-align: top; font-size: 16px; color: #fff; font-weight: 500; padding: 20px; text-align: center; border-radius: 3px 3px 0 0; background-color: #68B90F;" valign="top" align="center" bgcolor="#68B90F">
-              모든 알림이 정상 해제되었습니다.
+              모든 알림이 정상 복구되었습니다.
             </td>
             {{ end }}
           </tr>
@@ -119,7 +111,7 @@ h4 {
                 <tr style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                   <td class="content-block" style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; padding: 0 0 20px;" valign="top">
                     <strong style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">{{ or .Annotations.summary .Labels.alertname }}</strong><br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
-                    대상 서버: {{ .Labels.instance }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
+                    대상 서버: {{ .Labels.server }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                     서비스: {{ .Labels.job }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                     심각도: {{ .Labels.severity | toUpper }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                     {{ if .Annotations.description }}<strong style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">상세 내용</strong><br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">{{ .Annotations.description }}<br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">{{ end }}
@@ -147,7 +139,7 @@ h4 {
                 <tr style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                   <td class="content-block" style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; padding: 0 0 20px;" valign="top">
                     <strong style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">{{ or .Annotations.summary .Labels.alertname }}</strong><br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
-                    대상 서버: {{ .Labels.instance }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
+                    대상 서버: {{ .Labels.server }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                     서비스: {{ .Labels.job }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                     심각도: {{ .Labels.severity | toUpper }} <br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">
                     {{ if .Annotations.description }}<strong style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">상세 내용</strong><br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">{{ .Annotations.description }}<br style="margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px;">{{ end }}

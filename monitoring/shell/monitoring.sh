@@ -414,7 +414,7 @@ main_menu() {
         node_rollout_menu
         ;;
       5)
-        print_info "종료합니다."
+        print_info "Bye."
         exit 0
         ;;
       *)
