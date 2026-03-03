@@ -209,6 +209,8 @@ EOF_COMPOSE
 global:
   scrape_interval: 15s
   evaluation_interval: 30s
+  external_labels:
+    site: "UNKNOWN_SITE"
 
 rule_files:
   - /etc/prometheus/rules.yml
