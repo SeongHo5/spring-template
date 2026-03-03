@@ -277,7 +277,7 @@ EOF_ALERT
 
   cat > "${outdir}/monitoring/prometheus/targets/node-exporter.yml" <<'EOF_TARGETS'
 - targets:
-    - 127.0.0.1:19100
+    - host.docker.internal:19100
   labels:
     job: node-exporter
 EOF_TARGETS
