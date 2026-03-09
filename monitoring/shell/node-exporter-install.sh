@@ -1,26 +1,65 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_LIB="${SCRIPT_DIR}/lib/common.sh"
-
-# shellcheck disable=SC1091
-source "${COMMON_LIB}"
-
 DEFAULT_VERSION="v1.10.2"
 DEFAULT_PORT="19100"
 DEFAULT_EXTRA_ARGS="--collector.systemd --collector.processes"
+DEFAULT_OUTDIR="."
+
+###########
+# Utilities
+###########
+
+print_info() {
+  echo "[INFO] $1"
+}
+
+print_warn() {
+  echo "[WARN] $1"
+}
+
+print_error() {
+  echo "[ERROR] $1"
+}
+
+print_ok() {
+  echo "[DONE] $1"
+}
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || {
+    print_error "필수 명령어가 없습니다: $1"
+    return 1
+  }
+}
+
+run_as_root() {
+  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    "$@"
+    return $?
+  fi
+
+  if ! command -v sudo >/dev/null 2>&1; then
+    print_error "sudo 명령어를 찾지 못했습니다. root로 실행하거나 sudo를 설치해주세요."
+    return 1
+  fi
+
+  sudo "$@"
+}
 
 usage() {
   cat <<USAGE
 사용법:
   $(basename "$0") [--version <vX.Y.Z>] [--port <port>] [--tarball <path>] [--extra-args "..."]
+  $(basename "$0") --download-only [--version <vX.Y.Z>] [--outdir <dir>]
 
 옵션:
-  --version      node_exporter 버전 (기본값: ${DEFAULT_VERSION})
-  --port         수집 포트 (기본값: ${DEFAULT_PORT})
-  --tarball      로컬 tar.gz 파일 경로(오프라인 설치)
-  --extra-args   추가 실행 인자
+  --version        node_exporter 버전 (기본값: ${DEFAULT_VERSION})
+  --port           수집 포트 (기본값: ${DEFAULT_PORT})
+  --tarball        로컬 tar.gz 파일 경로(오프라인 설치)
+  --extra-args     추가 실행 인자
+  --download-only  tar.gz 파일만 다운로드(설치/서비스 설정 안 함)
+  --outdir         다운로드 저장 경로 (기본값: ${DEFAULT_OUTDIR})
 USAGE
 }
 
@@ -164,6 +203,8 @@ main() {
   local port="${DEFAULT_PORT}"
   local tarball=""
   local extra_args="${DEFAULT_EXTRA_ARGS}"
+  local outdir="${DEFAULT_OUTDIR}"
+  local download_only="N"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -183,6 +224,14 @@ main() {
         extra_args="$2"
         shift 2
         ;;
+      --download-only)
+        download_only="Y"
+        shift 1
+        ;;
+      --outdir)
+        outdir="$2"
+        shift 2
+        ;;
       -h|--help)
         usage
         return 0
@@ -196,6 +245,16 @@ main() {
   done
 
   [[ "${version}" == v* ]] || version="v${version}"
+
+  # 다운로드 전용 모드: 설치/서비스 구성 없이 tar.gz만 내려받고 종료
+  if [[ "${download_only}" == "Y" ]]; then
+    # outdir가 시스템 경로일 수 있어 root로 먼저 시도
+    run_as_root mkdir -p "${outdir}" >/dev/null 2>&1 || mkdir -p "${outdir}"
+    local downloaded
+    downloaded="$(download_tarball "${version}" "${outdir}")"
+    print_ok "다운로드 완료: ${downloaded}"
+    return 0
+  fi
 
   local work_tmp
   work_tmp="$(mktemp -d)"
